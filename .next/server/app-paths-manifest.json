@@ -1,0 +1,9 @@
+{
+  "/manifest.webmanifest/route": "app/manifest.webmanifest/route.js",
+  "/(app)/profile/page": "app/(app)/profile/page.js",
+  "/(app)/current/page": "app/(app)/current/page.js",
+  "/(app)/g/[groupId]/routine/page": "app/(app)/g/[groupId]/routine/page.js",
+  "/(app)/g/[groupId]/page": "app/(app)/g/[groupId]/page.js",
+  "/(auth)/login/page": "app/(auth)/login/page.js",
+  "/(app)/groups/page": "app/(app)/groups/page.js"
+}
