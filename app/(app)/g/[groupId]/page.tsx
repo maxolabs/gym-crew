@@ -1,15 +1,7 @@
 import { notFound } from "next/navigation";
 import { requireUser } from "@/lib/auth";
 import { supabaseServer } from "@/lib/supabase/server";
-import { TopBar } from "@/components/nav/TopBar";
-import { Button } from "@/components/ui/Button";
-import { Card, CardMeta, CardTitle } from "@/components/ui/Card";
-import { SetCurrentGroup } from "@/components/group/SetCurrentGroup";
-import { RoutineCard } from "@/components/group/RoutineCard";
-import { InviteLinkCard } from "@/components/group/InviteLinkCard";
-import { CheckInCard } from "@/components/group/CheckInCard";
-import { PendingApprovals } from "@/components/group/PendingApprovals";
-import { LeaveGroupButton } from "@/components/group/LeaveGroupButton";
+import { GroupDashboard } from "@/components/group/GroupDashboard";
 import { monthRangeInTz, prevMonthStartInTz, todayInTz } from "@/lib/time";
 
 function computeStreak(dates: string[], today: string) {
@@ -153,162 +145,27 @@ export default async function GroupDashboardPage({
     }
   }
 
+  const lastMonthWinnerName = lastMonthWinner
+    ? (lastMonthWinner.users as unknown as { name: string } | null)?.name ?? null
+    : null;
+
   return (
-    <div className="space-y-3">
-      <SetCurrentGroup groupId={groupId} />
-
-      <TopBar
-        title={group.name}
-        right={
-          <Button href="/groups" variant="ghost">
-            Groups
-          </Button>
-        }
-      />
-
-      {group.description ? (
-        <Card className="space-y-1">
-          <CardTitle>Overview</CardTitle>
-          <CardMeta>{group.description}</CardMeta>
-          <p className="text-xs text-muted">Timezone: {tz}</p>
-        </Card>
-      ) : null}
-
-      <Card className="space-y-2">
-        <CardTitle>This month</CardTitle>
-        <div className="grid grid-cols-2 gap-2">
-          <div className="rounded-xl border border-white/10 bg-card2 px-3 py-3">
-            <p className="text-xs text-muted">Your approved</p>
-            <p className="text-2xl font-bold">{myMonthCount}</p>
-          </div>
-          <div className="rounded-xl border border-white/10 bg-card2 px-3 py-3">
-            <p className="text-xs text-muted">Streak (needs today)</p>
-            <p className="text-2xl font-bold">{streak}</p>
-          </div>
-        </div>
-        {lastMonthWinner ? (
-          <p className="text-xs text-muted">
-            Last month winner:{" "}
-            <span className="font-semibold text-text">
-              {(lastMonthWinner.users as unknown as { name: string } | null)?.name ?? lastMonthWinner.user_id}
-            </span>
-          </p>
-        ) : (
-          <p className="text-xs text-muted">Last month winner: —</p>
-        )}
-      </Card>
-
-      <RoutineCard
-        groupId={groupId}
-        routineUrl={routineSignedUrl}
-        contentType={group.routine_content_type ?? null}
-        isAdmin={isAdmin}
-      />
-
-      {isAdmin ? <InviteLinkCard groupId={groupId} /> : null}
-
-      <Card className="space-y-2">
-        <div className="flex items-start justify-between gap-3">
-          <div className="min-w-0">
-            <CardTitle>Locations</CardTitle>
-            <CardMeta>
-              {locations?.length
-                ? `${locations.length} location(s) set`
-                : "No locations yet"}
-            </CardMeta>
-          </div>
-          {isAdmin ? (
-            <Button href={`/g/${groupId}/locations`} variant="secondary">
-              Manage
-            </Button>
-          ) : null}
-        </div>
-        {locations?.length ? (
-          <div className="space-y-2">
-            {locations.slice(0, 3).map((l: any) => (
-              <div
-                key={l.id}
-                className="rounded-xl border border-white/10 bg-card2 px-3 py-2"
-              >
-                <p className="text-sm font-semibold">{l.name}</p>
-                <p className="text-xs text-muted">
-                  Radius: {l.radius_m}m • {l.lat.toFixed(5)}, {l.lng.toFixed(5)}
-                </p>
-              </div>
-            ))}
-            {locations.length > 3 ? (
-              <p className="text-xs text-muted">…and {locations.length - 3} more</p>
-            ) : null}
-          </div>
-        ) : (
-          <p className="text-xs text-muted">
-            Check-ins need a location radius. Ask an admin to add one.
-          </p>
-        )}
-      </Card>
-
-      <CheckInCard
-        groupId={groupId}
-        timezone={tz}
-        userId={user.id}
-        locations={(locations ?? []) as any}
-      />
-
-      <PendingApprovals items={(pending ?? []) as any} isAdmin={isAdmin} />
-
-      <Card className="space-y-2">
-        <CardTitle>Leaderboard (this month)</CardTitle>
-        {!leaderboard.length ? (
-          <CardMeta>No approved check-ins yet.</CardMeta>
-        ) : (
-          <div className="space-y-2">
-            {leaderboard.map((row, idx) => (
-              <div
-                key={row.user_id}
-                className="flex items-center justify-between rounded-xl border border-white/10 bg-card2 px-3 py-2"
-              >
-                <p className="truncate text-sm">
-                  <span className="text-muted">{idx + 1}.</span>{" "}
-                  <span className="font-semibold">{row.name}</span>
-                </p>
-                <p className="text-sm font-semibold">{row.count}</p>
-              </div>
-            ))}
-          </div>
-        )}
-      </Card>
-
-      <Card className="space-y-2">
-        <div className="flex items-start justify-between gap-3">
-          <CardTitle>Members</CardTitle>
-          <LeaveGroupButton
-            groupId={groupId}
-            userId={user.id}
-            isAdmin={isAdmin}
-            memberCount={members?.length ?? 0}
-          />
-        </div>
-        <div className="space-y-2">
-          {(members ?? []).map((m: any) => (
-            <div
-              key={m.user_id}
-              className="flex items-center justify-between rounded-xl border border-white/10 bg-card2 px-3 py-2"
-            >
-              <div className="min-w-0">
-                <p className="truncate text-sm font-semibold">
-                  {m.users?.name ?? m.user_id}
-                </p>
-                <p className="text-xs text-muted">{m.role}</p>
-              </div>
-              {m.user_id === user.id ? (
-                <span className="text-xs text-muted">You</span>
-              ) : null}
-            </div>
-          ))}
-        </div>
-      </Card>
-    </div>
+    <GroupDashboard
+      groupId={groupId}
+      groupName={group.name}
+      description={group.description}
+      timezone={tz}
+      routineUrl={routineSignedUrl}
+      contentType={group.routine_content_type ?? null}
+      isAdmin={isAdmin}
+      userId={user.id}
+      members={(members ?? []) as any}
+      locations={(locations ?? []) as any}
+      myMonthCount={myMonthCount}
+      streak={streak}
+      lastMonthWinnerName={lastMonthWinnerName}
+      leaderboard={leaderboard}
+      pending={(pending ?? []) as any}
+    />
   );
 }
-
-

@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import "leaflet/dist/leaflet.css";
 import "./globals.css";
 import { ToastProvider } from "@/components/ui/Toast";
 import { InstallPrompt } from "@/components/pwa/InstallPrompt";
