@@ -207,7 +207,8 @@ begin
     raise exception 'not_authorized';
   end if;
 
-  v_token := encode(gen_random_bytes(18), 'base64url');
+  -- Use hex encoding (URL-safe, no special chars)
+  v_token := encode(gen_random_bytes(18), 'hex');
 
   insert into public.group_invites (token, group_id, created_by, expires_at, max_uses)
   values (

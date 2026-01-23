@@ -1,7 +1,9 @@
 "use client";
 
+import { useState } from "react";
 import { Card, CardMeta, CardTitle } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
+import { ImageViewer } from "@/components/ui/ImageViewer";
 
 export function RoutineCard({
   groupId,
@@ -14,6 +16,9 @@ export function RoutineCard({
   contentType: string | null;
   isAdmin: boolean;
 }) {
+  const [viewerOpen, setViewerOpen] = useState(false);
+  const isImage = contentType && !contentType.includes("pdf");
+
   return (
     <Card className="space-y-3">
       <div className="flex items-start justify-between gap-3">
@@ -52,15 +57,29 @@ export function RoutineCard({
         </div>
       ) : (
         <div className="space-y-2">
-          <div className="overflow-hidden rounded-xl border border-white/10 bg-black">
+          <button
+            type="button"
+            onClick={() => setViewerOpen(true)}
+            className="w-full overflow-hidden rounded-xl border border-white/10 bg-black cursor-zoom-in"
+          >
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={routineUrl} alt="Gym routine" className="h-auto w-full" />
-          </div>
+          </button>
+          <p className="text-xs text-muted text-center">Tap image to zoom</p>
           <Button href={routineUrl} variant="ghost" className="h-10 px-0 text-sm">
             Download / Open
           </Button>
         </div>
       )}
+
+      {isImage && routineUrl ? (
+        <ImageViewer
+          src={routineUrl}
+          alt="Gym routine"
+          open={viewerOpen}
+          onClose={() => setViewerOpen(false)}
+        />
+      ) : null}
     </Card>
   );
 }

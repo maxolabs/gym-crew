@@ -86,14 +86,8 @@ function LoginForm() {
         </Button>
         <Button
           variant="ghost"
+          href="/reset-password"
           className="h-10 px-0 text-sm text-muted"
-          onClick={() =>
-            push({
-              type: "info",
-              message:
-                "If you forgot your password, we can add reset later (kept out for now)."
-            })
-          }
         >
           Forgot?
         </Button>

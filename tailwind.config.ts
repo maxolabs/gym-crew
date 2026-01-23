@@ -16,6 +16,15 @@ export default {
       },
       boxShadow: {
         soft: "0 8px 30px rgba(0, 0, 0, 0.35)"
+      },
+      keyframes: {
+        "slide-in-from-bottom": {
+          "0%": { transform: "translateY(100%)" },
+          "100%": { transform: "translateY(0)" }
+        }
+      },
+      animation: {
+        "slide-in-from-bottom": "slide-in-from-bottom 0.3s ease-out"
       }
     }
   },
