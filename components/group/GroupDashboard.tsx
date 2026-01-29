@@ -99,22 +99,26 @@ export function GroupDashboard({
         }
       />
 
-      {/* Stats Card - Compact */}
+      {/* Stats Card - Different for trainers vs clients */}
       <Card className="space-y-2">
         <div className="flex items-center justify-between">
           <CardTitle>This month</CardTitle>
-          <p className="text-xs text-muted">{members.length} members</p>
+          <p className="text-xs text-muted">
+            {members.length - 1} client{members.length - 1 !== 1 ? "s" : ""}
+          </p>
         </div>
-        <div className="grid grid-cols-2 gap-2">
-          <div className="rounded-xl border border-white/10 bg-card2 px-3 py-3">
-            <p className="text-xs text-muted">Check-ins</p>
-            <p className="text-2xl font-bold">{myMonthCount}</p>
+        {!isAdmin && (
+          <div className="grid grid-cols-2 gap-2">
+            <div className="rounded-xl border border-white/10 bg-card2 px-3 py-3">
+              <p className="text-xs text-muted">Check-ins</p>
+              <p className="text-2xl font-bold">{myMonthCount}</p>
+            </div>
+            <div className="rounded-xl border border-white/10 bg-card2 px-3 py-3">
+              <p className="text-xs text-muted">Streak</p>
+              <p className="text-2xl font-bold">{streak}</p>
+            </div>
           </div>
-          <div className="rounded-xl border border-white/10 bg-card2 px-3 py-3">
-            <p className="text-xs text-muted">Streak</p>
-            <p className="text-2xl font-bold">{streak}</p>
-          </div>
-        </div>
+        )}
         {lastMonthWinnerName ? (
           <p className="text-xs text-muted">
             Last month winner:{" "}
@@ -132,12 +136,15 @@ export function GroupDashboard({
         isAdmin={isAdmin}
       />
 
-      <CheckInCard
-        groupId={groupId}
-        timezone={timezone}
-        userId={userId}
-        locations={locations}
-      />
+      {/* Trainers don't check in - they only approve */}
+      {!isAdmin && (
+        <CheckInCard
+          groupId={groupId}
+          timezone={timezone}
+          userId={userId}
+          locations={locations}
+        />
+      )}
 
       <PendingApprovals items={pending} isAdmin={isAdmin} />
 

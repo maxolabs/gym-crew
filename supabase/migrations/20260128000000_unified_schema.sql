@@ -255,7 +255,8 @@ BEGIN
     RAISE EXCEPTION 'not_authorized';
   END IF;
 
-  v_token := encode(gen_random_bytes(18), 'base64url');
+  -- Use gen_random_uuid and convert to URL-safe token
+  v_token := replace(replace(gen_random_uuid()::text, '-', ''), '=', '');
 
   INSERT INTO public.group_invites (token, group_id, created_by, expires_at, max_uses)
   VALUES (

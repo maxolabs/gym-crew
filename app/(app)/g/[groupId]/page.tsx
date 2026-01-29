@@ -31,7 +31,7 @@ export default async function GroupDashboardPage({
   const [{ data: group }, { data: myMembership }] = await Promise.all([
     supabase
       .from("gym_groups")
-      .select("id,name,description,timezone,routine_url,routine_content_type,routine_name,routine_deadline,created_at")
+      .select("id,name,description,timezone,routine_url,routine_content_type,routine_name,routine_deadline,created_by,created_at")
       .eq("id", groupId)
       .maybeSingle(),
     supabase
@@ -111,12 +111,14 @@ export default async function GroupDashboardPage({
     // non-critical
   }
 
-  // Compute leaderboard
+  // Compute leaderboard (exclude trainer)
+  const trainerId = group.created_by;
   const counts = new Map<string, number>();
   for (const c of monthCheckins ?? []) {
     counts.set(c.user_id, (counts.get(c.user_id) ?? 0) + 1);
   }
   const leaderboard = (members ?? [])
+    .filter((m: any) => m.user_id !== trainerId) // Exclude trainer
     .map((m: any) => ({
       user_id: m.user_id,
       name: m.users?.name ?? m.user_id,

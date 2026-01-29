@@ -207,8 +207,8 @@ begin
     raise exception 'not_authorized';
   end if;
 
-  -- Use hex encoding (URL-safe, no special chars)
-  v_token := encode(gen_random_bytes(18), 'hex');
+  -- Use gen_random_uuid and convert to URL-safe token
+  v_token := replace(replace(gen_random_uuid()::text, '-', ''), '=', '');
 
   insert into public.group_invites (token, group_id, created_by, expires_at, max_uses)
   values (
