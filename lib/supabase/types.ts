@@ -200,6 +200,8 @@ export type Database = {
           id: string;
           name: string;
           routine_content_type: string | null;
+          routine_deadline: string | null;
+          routine_name: string | null;
           routine_url: string | null;
           timezone: string;
         };
@@ -210,6 +212,8 @@ export type Database = {
           id?: string;
           name: string;
           routine_content_type?: string | null;
+          routine_deadline?: string | null;
+          routine_name?: string | null;
           routine_url?: string | null;
           timezone?: string;
         };
@@ -220,6 +224,8 @@ export type Database = {
           id?: string;
           name?: string;
           routine_content_type?: string | null;
+          routine_deadline?: string | null;
+          routine_name?: string | null;
           routine_url?: string | null;
           timezone?: string;
         };
@@ -313,18 +319,21 @@ export type Database = {
           created_at: string;
           id: string;
           name: string;
+          user_type: string;
         };
         Insert: {
           avatar_url?: string | null;
           created_at?: string;
           id: string;
           name: string;
+          user_type?: string;
         };
         Update: {
           avatar_url?: string | null;
           created_at?: string;
           id?: string;
           name?: string;
+          user_type?: string;
         };
         Relationships: [];
       };
@@ -375,6 +384,10 @@ export type Database = {
           created_at: string;
           role: string;
           my_month_count: number;
+          routine_deadline: string | null;
+          routine_name: string | null;
+          trainer_id: string;
+          trainer_name: string;
         }[];
       };
       is_group_admin: {
@@ -387,6 +400,10 @@ export type Database = {
         Args: {
           p_group_id: string;
         };
+        Returns: boolean;
+      };
+      is_trainer: {
+        Args: Record<PropertyKey, never>;
         Returns: boolean;
       };
       join_group_with_token: {
@@ -429,6 +446,9 @@ export type CheckIn = Tables<"check_ins">;
 export type ManualApproval = Tables<"manual_approvals">;
 export type Badge = Tables<"badges">;
 export type GroupInvite = Tables<"group_invites">;
+
+// User type enum
+export type UserType = "USER" | "TRAINER";
 
 // Role enum
 export type MemberRole = "ADMIN" | "MEMBER";

@@ -31,7 +31,7 @@ export default async function GroupDashboardPage({
   const [{ data: group }, { data: myMembership }] = await Promise.all([
     supabase
       .from("gym_groups")
-      .select("id,name,description,timezone,routine_url,routine_content_type,created_at")
+      .select("id,name,description,timezone,routine_url,routine_content_type,routine_name,routine_deadline,created_at")
       .eq("id", groupId)
       .maybeSingle(),
     supabase
@@ -157,6 +157,8 @@ export default async function GroupDashboardPage({
       timezone={tz}
       routineUrl={routineSignedUrl}
       contentType={group.routine_content_type ?? null}
+      routineName={group.routine_name ?? null}
+      routineDeadline={group.routine_deadline ?? null}
       isAdmin={isAdmin}
       userId={user.id}
       members={(members ?? []) as any}

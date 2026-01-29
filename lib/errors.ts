@@ -65,6 +65,9 @@ export function humanizeError(error: unknown): string {
   if (message.includes("not_pending_manual")) {
     return "This check-in is not pending manual approval.";
   }
+  if (message.includes("only_trainers_can_create_groups")) {
+    return "Only trainers can create groups.";
+  }
 
   // Network errors
   if (message.includes("Failed to fetch") || message.includes("NetworkError")) {

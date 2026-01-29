@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Dumbbell, Layers, User } from "lucide-react";
+import { Home, Layers, User, LayoutDashboard } from "lucide-react";
 import { cn } from "@/lib/cn";
 import type React from "react";
 
@@ -13,18 +13,18 @@ type Tab = {
   isActive: (pathname: string) => boolean;
 };
 
-const tabs: Tab[] = [
+const userTabs: Tab[] = [
+  {
+    href: "/dashboard",
+    label: "Home",
+    icon: <Home className="h-5 w-5" />,
+    isActive: (p) => p === "/dashboard"
+  },
   {
     href: "/groups",
     label: "Groups",
     icon: <Layers className="h-5 w-5" />,
-    isActive: (p) => p === "/groups" || p.startsWith("/groups/")
-  },
-  {
-    href: "/current",
-    label: "Current",
-    icon: <Dumbbell className="h-5 w-5" />,
-    isActive: (p) => p === "/current" || p.startsWith("/g/")
+    isActive: (p) => p === "/groups" || p.startsWith("/groups/") || p.startsWith("/g/")
   },
   {
     href: "/profile",
@@ -34,8 +34,37 @@ const tabs: Tab[] = [
   }
 ];
 
-export function BottomTabs() {
+const trainerTabs: Tab[] = [
+  {
+    href: "/trainer",
+    label: "Dashboard",
+    icon: <LayoutDashboard className="h-5 w-5" />,
+    isActive: (p) => p === "/trainer"
+  },
+  {
+    href: "/trainer/groups",
+    label: "Groups",
+    icon: <Layers className="h-5 w-5" />,
+    isActive: (p) =>
+      p === "/trainer/groups" ||
+      p.startsWith("/trainer/groups/") ||
+      p.startsWith("/g/")
+  },
+  {
+    href: "/profile",
+    label: "Profile",
+    icon: <User className="h-5 w-5" />,
+    isActive: (p) => p === "/profile"
+  }
+];
+
+type Props = {
+  isTrainer?: boolean;
+};
+
+export function BottomTabs({ isTrainer = false }: Props) {
   const pathname = usePathname();
+  const tabs = isTrainer ? trainerTabs : userTabs;
 
   return (
     <nav className="fixed inset-x-0 bottom-0 z-30 border-t border-white/10 bg-bg/90 backdrop-blur">
@@ -60,5 +89,3 @@ export function BottomTabs() {
     </nav>
   );
 }
-
-
