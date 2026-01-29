@@ -65,7 +65,7 @@ export async function middleware(request: NextRequest) {
 
   if (isAuthed && (pathname === "/login" || pathname === "/register")) {
     const url = request.nextUrl.clone();
-    url.pathname = "/";
+    url.pathname = "/dashboard";
     return NextResponse.redirect(url);
   }
 

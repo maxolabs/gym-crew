@@ -32,7 +32,12 @@ export async function getUserProfile(): Promise<UserProfile | null> {
     .eq("id", authUser.id)
     .single();
 
-  if (!profile) return null;
+  if (!profile) {
+    // Auth user exists but profile doesn't (database was reset)
+    // Sign out to clear stale session
+    await supabase.auth.signOut();
+    return null;
+  }
 
   return { ...profile, email: authUser.email };
 }
