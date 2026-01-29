@@ -46,6 +46,8 @@ export function GroupDashboard({
   timezone,
   routineUrl,
   contentType,
+  routineName,
+  routineDeadline,
   isAdmin,
   userId,
   members,
@@ -62,6 +64,8 @@ export function GroupDashboard({
   timezone: string;
   routineUrl: string | null;
   contentType: string | null;
+  routineName: string | null;
+  routineDeadline: string | null;
   isAdmin: boolean;
   userId: string;
   members: Member[];
@@ -123,6 +127,8 @@ export function GroupDashboard({
         groupId={groupId}
         routineUrl={routineUrl}
         contentType={contentType}
+        routineName={routineName}
+        routineDeadline={routineDeadline}
         isAdmin={isAdmin}
       />
 

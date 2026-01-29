@@ -1,15 +1,20 @@
-import { requireUser } from "@/lib/auth";
+import { requireUserProfile } from "@/lib/auth";
 import { supabaseServer } from "@/lib/supabase/server";
 import { TopBar } from "@/components/nav/TopBar";
-import { Button } from "@/components/ui/Button";
 import { Card, CardMeta, CardTitle } from "@/components/ui/Card";
+import { Button } from "@/components/ui/Button";
+import { EmptyState } from "@/components/ui/EmptyState";
+import { CountdownBadge } from "@/components/ui/CountdownBadge";
+import { Layers } from "lucide-react";
 import { monthRangeInTz } from "@/lib/time";
+import type { Database } from "@/lib/supabase/types";
+
+type GroupWithStats = Database["public"]["Functions"]["get_my_groups_with_stats"]["Returns"][number];
 
 export default async function GroupsPage() {
-  await requireUser();
+  const profile = await requireUserProfile();
   const supabase = await supabaseServer();
 
-  // Use UTC for the overall month range - each group's timezone is handled in the RPC
   const { start, end } = monthRangeInTz("UTC");
 
   const { data: withStats } = await supabase.rpc("get_my_groups_with_stats", {
@@ -17,43 +22,88 @@ export default async function GroupsPage() {
     p_month_end: end
   });
 
+  const isTrainer = profile.user_type === "TRAINER";
+
   return (
     <div className="space-y-3">
-      <TopBar title="My Groups" right={<Button href="/groups/new">Create</Button>} />
+      <TopBar
+        title="My Groups"
+        right={
+          isTrainer ? (
+            <Button href="/trainer/groups/new">Create</Button>
+          ) : null
+        }
+      />
 
       {!withStats?.length ? (
-        <Card className="space-y-3">
-          <CardTitle>No groups yet</CardTitle>
-          <CardMeta>Create one, then share the join link with your friends.</CardMeta>
-          <Button href="/groups/new" size="lg">
-            Create your first group
-          </Button>
-        </Card>
+        <EmptyState
+          icon={<Layers className="h-7 w-7" />}
+          title="No groups yet"
+          description={
+            isTrainer
+              ? "Create a group to start training clients."
+              : "Ask your trainer for an invite link to join their group."
+          }
+          action={
+            isTrainer ? (
+              <Button href="/trainer/groups/new">Create Group</Button>
+            ) : null
+          }
+        />
       ) : (
         <div className="space-y-3">
-          {withStats.map((g: any) => (
-            <Card key={g.id} className="space-y-2">
-              <div className="flex items-start justify-between gap-3">
-                <div className="min-w-0">
-                  <CardTitle className="truncate">{g.name}</CardTitle>
-                  <CardMeta className="truncate">
-                    {g.description || "No description"}
-                  </CardMeta>
+          {withStats.map((g: GroupWithStats) => {
+            const hasActiveRoutine =
+              g.routine_deadline && new Date(g.routine_deadline) > new Date();
+            const hasExpiredRoutine =
+              g.routine_deadline && new Date(g.routine_deadline) <= new Date();
+
+            return (
+              <Card key={g.id} className="space-y-2">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0 flex-1">
+                    <CardTitle className="truncate">{g.name}</CardTitle>
+                    <CardMeta className="truncate">
+                      {g.description || `Trainer: ${g.trainer_name}`}
+                    </CardMeta>
+                  </div>
+                  <Button href={`/g/${g.id}`} variant="secondary">
+                    Open
+                  </Button>
                 </div>
-                <Button href={`/g/${g.id}`} variant="secondary">
-                  Open
-                </Button>
-              </div>
-              <div className="text-xs text-muted">
-                TZ: {g.timezone} • Role: {g.role ?? "MEMBER"} • Your month:{" "}
-                {g.my_month_count}
-              </div>
-            </Card>
-          ))}
+
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="rounded-full bg-card2 px-2.5 py-1 text-xs text-muted">
+                    {g.my_month_count} check-ins this month
+                  </span>
+                  {g.routine_name && hasActiveRoutine && g.routine_deadline && (
+                    <CountdownBadge deadline={g.routine_deadline} />
+                  )}
+                  {hasExpiredRoutine && (
+                    <span className="rounded-full bg-muted/10 px-2.5 py-1 text-xs text-muted">
+                      Routine ended
+                    </span>
+                  )}
+                </div>
+
+                {!isTrainer && (
+                  <p className="text-xs text-muted">
+                    Trainer: {g.trainer_name}
+                  </p>
+                )}
+              </Card>
+            );
+          })}
         </div>
+      )}
+
+      {!isTrainer && withStats && withStats.length > 0 && (
+        <Card className="text-center">
+          <CardMeta className="mb-2">
+            Have an invite link? Use it to join another group.
+          </CardMeta>
+        </Card>
       )}
     </div>
   );
 }
-
-

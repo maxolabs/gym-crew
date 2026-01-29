@@ -25,14 +25,22 @@ export default async function RoutinePage({
 
   const { data: group } = await supabase
     .from("gym_groups")
-    .select("routine_url")
+    .select("routine_url,routine_content_type,routine_name,routine_deadline")
     .eq("id", groupId)
     .maybeSingle();
+
+  let routineSignedUrl: string | null = null;
+  if (group?.routine_url) {
+    const { data } = await supabase.storage
+      .from("routines")
+      .createSignedUrl(group.routine_url, 60 * 60);
+    routineSignedUrl = data?.signedUrl ?? null;
+  }
 
   return (
     <div className="space-y-3">
       <TopBar
-        title="Routine"
+        title="Manage Routine"
         right={
           <Button href={`/g/${groupId}`} variant="ghost">
             Back
@@ -43,13 +51,27 @@ export default async function RoutinePage({
       {!isAdmin ? (
         <Card className="space-y-2">
           <CardTitle>Admins only</CardTitle>
-          <CardMeta>You don’t have permission to upload/replace routines.</CardMeta>
+          <CardMeta>You don't have permission to upload/replace routines.</CardMeta>
         </Card>
       ) : (
-        <RoutineUploader groupId={groupId} existingPath={group?.routine_url ?? null} />
+        <Card className="space-y-4">
+          <div>
+            <CardTitle>
+              {group?.routine_url ? "Update Routine" : "Upload Routine"}
+            </CardTitle>
+            <CardMeta>
+              Set a name, deadline, and upload a PDF or image for your clients.
+            </CardMeta>
+          </div>
+          <RoutineUploader
+            groupId={groupId}
+            currentUrl={routineSignedUrl}
+            contentType={group?.routine_content_type ?? null}
+            currentName={group?.routine_name ?? null}
+            currentDeadline={group?.routine_deadline ?? null}
+          />
+        </Card>
       )}
     </div>
   );
 }
-
-

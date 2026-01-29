@@ -5,14 +5,15 @@ export default {
   theme: {
     extend: {
       colors: {
-        bg: "#0B0F14",
-        card: "#101826",
-        card2: "#0E1622",
-        text: "#E6EEF8",
-        muted: "#93A4B7",
-        accent: "#5EEAD4",
-        danger: "#FB7185",
-        warning: "#FBBF24"
+        bg: "#0A0A0B",
+        card: "#141416",
+        card2: "#1C1C1F",
+        text: "#FAFAFA",
+        muted: "#71717A",
+        accent: "#6366F1",
+        success: "#22C55E",
+        warning: "#F59E0B",
+        danger: "#EF4444"
       },
       boxShadow: {
         soft: "0 8px 30px rgba(0, 0, 0, 0.35)"

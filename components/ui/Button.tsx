@@ -10,13 +10,13 @@ type Props = React.ButtonHTMLAttributes<HTMLButtonElement> & {
 
 const styles: Record<NonNullable<Props["variant"]>, string> = {
   primary:
-    "bg-accent text-black hover:opacity-90 active:opacity-80 disabled:opacity-50 disabled:cursor-not-allowed",
+    "bg-accent text-white hover:bg-accent/90 active:bg-accent/80 disabled:opacity-50 disabled:cursor-not-allowed",
   secondary:
-    "bg-card text-text border border-white/10 hover:bg-card2 active:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed",
+    "bg-card2 text-text border border-white/10 hover:bg-white/10 active:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed",
   ghost:
     "bg-transparent text-text hover:bg-white/5 active:bg-white/10 disabled:opacity-50 disabled:cursor-not-allowed",
   danger:
-    "bg-danger text-black hover:opacity-90 active:opacity-80 disabled:opacity-50 disabled:cursor-not-allowed"
+    "bg-danger text-white hover:bg-danger/90 active:bg-danger/80 disabled:opacity-50 disabled:cursor-not-allowed"
 };
 
 const sizes: Record<NonNullable<Props["size"]>, string> = {
