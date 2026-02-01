@@ -8,6 +8,11 @@ import { todayInTz } from "@/lib/time";
 import { distanceMeters, formatDistance } from "@/lib/geo";
 import { useToast } from "@/components/ui/Toast";
 import { humanizeError } from "@/lib/errors";
+import {
+  checkAndAwardAchievements,
+  getStreakForUser,
+  getTotalCheckInsForUser
+} from "@/lib/achievements";
 
 type Location = {
   id: string;
@@ -26,7 +31,7 @@ type Props = {
 
 export function CheckInCard({ groupId, timezone, userId, locations }: Props) {
   const supabase = supabaseBrowser();
-  const { push } = useToast();
+  const { push, pushAchievement } = useToast();
 
   const [loading, setLoading] = useState(true); // Start true to prevent actions before status is loaded
   const [todayStatus, setTodayStatus] = useState<null | {
@@ -68,6 +73,39 @@ export function CheckInCard({ groupId, timezone, userId, locations }: Props) {
     setTodayStatus({ status: "PENDING", method: "MANUAL" });
   };
 
+  const checkAchievements = async (isApproved: boolean) => {
+    if (!isApproved) return;
+
+    try {
+      // Get stats for achievement context
+      const [streak, totalCheckIns] = await Promise.all([
+        getStreakForUser(supabase, userId, groupId, timezone),
+        getTotalCheckInsForUser(supabase, userId, groupId)
+      ]);
+
+      const awarded = await checkAndAwardAchievements(supabase, userId, groupId, {
+        currentStreak: streak,
+        totalCheckIns,
+        checkInTime: new Date(),
+        isFirstCheckIn: totalCheckIns === 1
+      });
+
+      // Show achievement toast for first awarded
+      if (awarded.length > 0) {
+        pushAchievement({
+          name: awarded[0].name,
+          description: awarded[0].description,
+          icon: awarded[0].icon,
+          rarity: awarded[0].rarity,
+          xp: awarded[0].xp
+        });
+      }
+    } catch (err) {
+      // Silently fail - achievements are not critical
+      console.error("Failed to check achievements:", err);
+    }
+  };
+
   const createGeo = async (lat: number, lng: number) => {
     if (!locations.length) {
       push({
@@ -103,6 +141,10 @@ export function CheckInCard({ groupId, timezone, userId, locations }: Props) {
     });
     if (error) throw error;
     setTodayStatus({ status: "APPROVED", method: "GEO" });
+
+    // Check for achievements after successful GPS check-in
+    checkAchievements(true);
+
     return true;
   };
 

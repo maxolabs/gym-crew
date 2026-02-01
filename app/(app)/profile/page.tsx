@@ -5,7 +5,9 @@ import { Card, CardMeta, CardTitle } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { Avatar } from "@/components/ui/Avatar";
 import { LogoutButton } from "@/components/auth/LogoutButton";
-import { Award } from "lucide-react";
+import { Award, Trophy, ChevronRight } from "lucide-react";
+import { AchievementBadge } from "@/components/achievements/AchievementBadge";
+import type { AchievementDefinition } from "@/lib/achievements/types";
 
 export default async function ProfilePage() {
   const profile = await requireUserProfile();
@@ -25,12 +27,23 @@ export default async function ProfilePage() {
       .eq("status", "APPROVED")
   ]);
 
-  const { data: badges } = await supabase
-    .from("badges")
-    .select("id,group_id,badge_type,period_start,period_end,created_at,gym_groups(name)")
-    .eq("user_id", profile.id)
-    .order("created_at", { ascending: false })
-    .limit(50);
+  const [{ data: badges }, { data: recentAchievements }, { data: achievementXp }] = await Promise.all([
+    supabase
+      .from("badges")
+      .select("id,group_id,badge_type,period_start,period_end,created_at,gym_groups(name)")
+      .eq("user_id", profile.id)
+      .order("created_at", { ascending: false })
+      .limit(50),
+    supabase
+      .from("user_achievements")
+      .select("id,earned_at,achievement_definitions(*)")
+      .eq("user_id", profile.id)
+      .order("earned_at", { ascending: false })
+      .limit(3),
+    supabase.rpc("get_user_achievement_xp", { p_user_id: profile.id })
+  ]);
+
+  const totalXp = (achievementXp as number) ?? 0;
 
   return (
     <div className="space-y-3">
@@ -62,18 +75,51 @@ export default async function ProfilePage() {
 
       <Card className="space-y-2">
         <CardTitle>Stats</CardTitle>
-        <div className="grid grid-cols-2 gap-2">
+        <div className="grid grid-cols-3 gap-2">
           <div className="rounded-xl border border-white/10 bg-card2 px-3 py-3">
             <p className="text-xs text-muted">
-              {isTrainer ? "Groups Created" : "Groups Joined"}
+              {isTrainer ? "Groups" : "Groups"}
             </p>
             <p className="text-2xl font-bold">{groupCount ?? 0}</p>
           </div>
           <div className="rounded-xl border border-white/10 bg-card2 px-3 py-3">
-            <p className="text-xs text-muted">Total Check-ins</p>
+            <p className="text-xs text-muted">Check-ins</p>
             <p className="text-2xl font-bold">{totalApproved ?? 0}</p>
           </div>
+          <div className="rounded-xl border border-accent/20 bg-accent/5 px-3 py-3">
+            <p className="text-xs text-accent">Total XP</p>
+            <p className="text-2xl font-bold text-accent">{totalXp}</p>
+          </div>
         </div>
+      </Card>
+
+      {/* Achievements Section */}
+      <Card className="space-y-2">
+        <div className="flex items-center justify-between">
+          <CardTitle>Achievements</CardTitle>
+          <Button
+            href="/achievements"
+            variant="ghost"
+            className="h-8 gap-1 px-2 text-xs text-muted"
+          >
+            View All
+            <ChevronRight className="h-4 w-4" />
+          </Button>
+        </div>
+        {!recentAchievements?.length ? (
+          <CardMeta>No achievements yet — check in to start earning!</CardMeta>
+        ) : (
+          <div className="space-y-2">
+            {recentAchievements.map((ua: any) => (
+              <AchievementBadge
+                key={ua.id}
+                achievement={ua.achievement_definitions as AchievementDefinition}
+                earned={true}
+                size="sm"
+              />
+            ))}
+          </div>
+        )}
       </Card>
 
       <Card className="space-y-2">
