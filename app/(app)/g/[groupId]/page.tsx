@@ -145,6 +145,12 @@ export default async function GroupDashboardPage({
     ? (lastMonthWinner.users as unknown as { name: string } | null)?.name ?? null
     : null;
 
+  // Fetch user's XP level info
+  const { data: levelInfo } = await supabase.rpc("get_user_level_info", {
+    p_user_id: user.id,
+  });
+  const xpInfo = (levelInfo as any)?.[0] ?? null;
+
   // Count hypes received today by this user (across this group's check-ins)
   const myTodayCheckIn = (todayCheckins ?? []).find((c) => c.user_id === user.id);
   let todayHypesReceived = 0;
@@ -213,6 +219,7 @@ export default async function GroupDashboardPage({
       pending={(pending ?? []) as any}
       todayActivity={todayActivity}
       todayHypesReceived={todayHypesReceived}
+      xpInfo={xpInfo}
     />
   );
 }

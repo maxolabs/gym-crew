@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Info } from "lucide-react";
+import { cn } from "@/lib/cn";
 import { TopBar } from "@/components/nav/TopBar";
 import { Button } from "@/components/ui/Button";
 import { Card, CardMeta, CardTitle } from "@/components/ui/Card";
@@ -11,6 +12,7 @@ import { CheckInCard } from "@/components/group/CheckInCard";
 import { PendingApprovals } from "@/components/group/PendingApprovals";
 import { GroupInfoSheet } from "@/components/group/GroupInfoSheet";
 import { ActivityFeed, type ActivityItem } from "@/components/group/ActivityFeed";
+import { XPProgressBar } from "@/components/xp";
 
 type Member = {
   user_id: string;
@@ -59,7 +61,8 @@ export function GroupDashboard({
   leaderboard,
   pending,
   todayActivity,
-  todayHypesReceived
+  todayHypesReceived,
+  xpInfo
 }: {
   groupId: string;
   groupName: string;
@@ -80,6 +83,15 @@ export function GroupDashboard({
   pending: PendingItem[];
   todayActivity: ActivityItem[];
   todayHypesReceived: number;
+  xpInfo: {
+    total_xp: number;
+    current_level: number;
+    level_title: string;
+    level_color: string;
+    xp_for_current_level: number;
+    xp_for_next_level: number;
+    progress_percent: number;
+  } | null;
 }) {
   const [sheetOpen, setSheetOpen] = useState(false);
 
@@ -132,6 +144,17 @@ export function GroupDashboard({
             </p>
           </div>
         )}
+        {!isAdmin && xpInfo && (
+          <XPProgressBar
+            currentXP={xpInfo.total_xp}
+            currentLevel={xpInfo.current_level}
+            levelTitle={xpInfo.level_title}
+            levelColor={xpInfo.level_color}
+            xpForCurrentLevel={xpInfo.xp_for_current_level}
+            xpForNextLevel={xpInfo.xp_for_next_level}
+            progressPercent={xpInfo.progress_percent}
+          />
+        )}
         {lastMonthWinnerName ? (
           <p className="text-xs text-muted">
             Last month winner:{" "}
@@ -176,18 +199,37 @@ export function GroupDashboard({
           <CardMeta>No check-ins yet this month.</CardMeta>
         ) : (
           <div className="space-y-2">
-            {leaderboard.map((row, idx) => (
-              <div
-                key={row.user_id}
-                className="flex items-center justify-between rounded-xl border border-white/10 bg-card2 px-3 py-2"
-              >
-                <p className="truncate text-sm">
-                  <span className="text-muted">{idx + 1}.</span>{" "}
-                  <span className="font-semibold">{row.name}</span>
-                </p>
-                <p className="text-sm font-semibold">{row.count}</p>
-              </div>
-            ))}
+            {leaderboard.map((row, idx) => {
+              const medal =
+                idx === 0 ? "🥇" : idx === 1 ? "🥈" : idx === 2 ? "🥉" : null;
+              const isTop3 = idx < 3;
+
+              return (
+                <div
+                  key={row.user_id}
+                  className={cn(
+                    "flex items-center justify-between rounded-xl border px-3 py-2",
+                    isTop3
+                      ? "border-white/15 bg-card2"
+                      : "border-white/10 bg-card2"
+                  )}
+                >
+                  <p className="truncate text-sm">
+                    {medal ? (
+                      <span className="mr-1">{medal}</span>
+                    ) : (
+                      <span className="text-muted">{idx + 1}.</span>
+                    )}{" "}
+                    <span className={cn("font-semibold", isTop3 && "text-text")}>
+                      {row.name}
+                    </span>
+                  </p>
+                  <p className={cn("text-sm font-semibold", isTop3 && "text-text")}>
+                    {row.count}
+                  </p>
+                </div>
+              );
+            })}
           </div>
         )}
       </Card>
