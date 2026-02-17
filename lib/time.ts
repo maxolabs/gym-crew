@@ -21,6 +21,23 @@ export function prevMonthStartInTz(timezone: string, now = new Date()) {
   return formatInTimeZone(prev, timezone, "yyyy-MM-01");
 }
 
+export function computeStreak(dates: string[], today: string): number {
+  const set = new Set(dates);
+  if (!set.has(today)) return 0;
+  let streak = 0;
+  let cur = new Date(`${today}T00:00:00Z`);
+  while (true) {
+    const key = cur.toISOString().slice(0, 10);
+    if (!set.has(key)) break;
+    streak += 1;
+    cur = new Date(cur.getTime() - 24 * 60 * 60 * 1000);
+  }
+  return streak;
+}
+
+
+
+
 
 
 

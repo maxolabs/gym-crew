@@ -2,21 +2,7 @@ import { notFound } from "next/navigation";
 import { requireUser } from "@/lib/auth";
 import { supabaseServer } from "@/lib/supabase/server";
 import { GroupDashboard } from "@/components/group/GroupDashboard";
-import { monthRangeInTz, prevMonthStartInTz, todayInTz } from "@/lib/time";
-
-function computeStreak(dates: string[], today: string) {
-  const set = new Set(dates);
-  if (!set.has(today)) return 0;
-  let streak = 0;
-  let cur = new Date(`${today}T00:00:00Z`);
-  while (true) {
-    const key = cur.toISOString().slice(0, 10);
-    if (!set.has(key)) break;
-    streak += 1;
-    cur = new Date(cur.getTime() - 24 * 60 * 60 * 1000);
-  }
-  return streak;
-}
+import { computeStreak, monthRangeInTz, prevMonthStartInTz, todayInTz } from "@/lib/time";
 
 export default async function GroupDashboardPage({
   params
@@ -159,6 +145,17 @@ export default async function GroupDashboardPage({
     ? (lastMonthWinner.users as unknown as { name: string } | null)?.name ?? null
     : null;
 
+  // Count hypes received today by this user (across this group's check-ins)
+  const myTodayCheckIn = (todayCheckins ?? []).find((c) => c.user_id === user.id);
+  let todayHypesReceived = 0;
+  if (myTodayCheckIn) {
+    const { count } = await supabase
+      .from("hypes")
+      .select("id", { count: "exact", head: true })
+      .eq("check_in_id", myTodayCheckIn.id);
+    todayHypesReceived = count ?? 0;
+  }
+
   // Build today's activity with hype data
   const checkInIds = (todayCheckins ?? []).map((c) => c.id);
   let hypeCounts = new Map<string, number>();
@@ -215,6 +212,7 @@ export default async function GroupDashboardPage({
       leaderboard={leaderboard}
       pending={(pending ?? []) as any}
       todayActivity={todayActivity}
+      todayHypesReceived={todayHypesReceived}
     />
   );
 }

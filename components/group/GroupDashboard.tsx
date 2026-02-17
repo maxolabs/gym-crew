@@ -58,7 +58,8 @@ export function GroupDashboard({
   lastMonthWinnerName,
   leaderboard,
   pending,
-  todayActivity
+  todayActivity,
+  todayHypesReceived
 }: {
   groupId: string;
   groupName: string;
@@ -78,6 +79,7 @@ export function GroupDashboard({
   leaderboard: LeaderboardRow[];
   pending: PendingItem[];
   todayActivity: ActivityItem[];
+  todayHypesReceived: number;
 }) {
   const [sheetOpen, setSheetOpen] = useState(false);
 
@@ -120,6 +122,14 @@ export function GroupDashboard({
               <p className="text-xs text-muted">Streak</p>
               <p className="text-2xl font-bold">{streak}</p>
             </div>
+          </div>
+        )}
+        {!isAdmin && todayHypesReceived > 0 && (
+          <div className="flex items-center gap-2 rounded-xl border border-red-500/20 bg-red-500/5 px-3 py-2">
+            <span className="text-base">🔥</span>
+            <p className="text-sm text-red-400">
+              You received <span className="font-bold">{todayHypesReceived}</span> hype{todayHypesReceived !== 1 ? "s" : ""} today!
+            </p>
           </div>
         )}
         {lastMonthWinnerName ? (

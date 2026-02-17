@@ -8,25 +8,11 @@ import { CountdownBadge } from "@/components/ui/CountdownBadge";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { ActivityFeed, type ActivityItem } from "@/components/group/ActivityFeed";
 import { Calendar, Flame, Award, Layers } from "lucide-react";
-import { monthRangeInTz, todayInTz } from "@/lib/time";
+import { computeStreak, monthRangeInTz, todayInTz } from "@/lib/time";
 import Link from "next/link";
 import type { Database } from "@/lib/supabase/types";
 
 type GroupWithStats = Database["public"]["Functions"]["get_my_groups_with_stats"]["Returns"][number];
-
-function computeStreak(dates: string[], today: string): number {
-  const set = new Set(dates);
-  if (!set.has(today)) return 0;
-  let streak = 0;
-  let cur = new Date(`${today}T00:00:00Z`);
-  while (true) {
-    const key = cur.toISOString().slice(0, 10);
-    if (!set.has(key)) break;
-    streak += 1;
-    cur = new Date(cur.getTime() - 24 * 60 * 60 * 1000);
-  }
-  return streak;
-}
 
 export default async function UserDashboardPage() {
   const profile = await requireUserProfile();
