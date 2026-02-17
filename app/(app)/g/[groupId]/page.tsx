@@ -58,7 +58,8 @@ export default async function GroupDashboardPage({
     { data: monthCheckins },
     { data: recentMine },
     { data: pending },
-    { data: lastMonthWinner }
+    { data: lastMonthWinner },
+    { data: todayCheckins }
   ] = await Promise.all([
     supabase
       .from("group_members")
@@ -98,7 +99,14 @@ export default async function GroupDashboardPage({
       .eq("group_id", groupId)
       .eq("badge_type", "MONTH_WINNER")
       .eq("period_start", prevMonthStart)
-      .maybeSingle()
+      .maybeSingle(),
+    supabase
+      .from("check_ins")
+      .select("id,user_id,method,created_at,users(name)")
+      .eq("group_id", groupId)
+      .eq("status", "APPROVED")
+      .eq("checkin_date", today)
+      .order("created_at", { ascending: false })
   ]);
 
   // Try to award last month's winner (idempotent, non-critical if it fails)
@@ -151,6 +159,42 @@ export default async function GroupDashboardPage({
     ? (lastMonthWinner.users as unknown as { name: string } | null)?.name ?? null
     : null;
 
+  // Build today's activity with hype data
+  const checkInIds = (todayCheckins ?? []).map((c) => c.id);
+  let hypeCounts = new Map<string, number>();
+  let userHyped = new Set<string>();
+
+  if (checkInIds.length > 0) {
+    const [{ data: hypeRows }, { data: myHypes }] = await Promise.all([
+      supabase
+        .from("hypes")
+        .select("check_in_id")
+        .in("check_in_id", checkInIds),
+      supabase
+        .from("hypes")
+        .select("check_in_id")
+        .in("check_in_id", checkInIds)
+        .eq("from_user_id", user.id),
+    ]);
+
+    for (const h of hypeRows ?? []) {
+      hypeCounts.set(h.check_in_id, (hypeCounts.get(h.check_in_id) ?? 0) + 1);
+    }
+    for (const h of myHypes ?? []) {
+      userHyped.add(h.check_in_id);
+    }
+  }
+
+  const todayActivity = (todayCheckins ?? []).map((c: any) => ({
+    id: c.id,
+    user_id: c.user_id,
+    user_name: c.users?.name ?? "Unknown",
+    method: c.method,
+    created_at: c.created_at,
+    hype_count: hypeCounts.get(c.id) ?? 0,
+    user_hyped: userHyped.has(c.id),
+  }));
+
   return (
     <GroupDashboard
       groupId={groupId}
@@ -170,6 +214,7 @@ export default async function GroupDashboardPage({
       lastMonthWinnerName={lastMonthWinnerName}
       leaderboard={leaderboard}
       pending={(pending ?? []) as any}
+      todayActivity={todayActivity}
     />
   );
 }

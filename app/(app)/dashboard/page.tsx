@@ -6,6 +6,7 @@ import { StatsCard } from "@/components/ui/StatsCard";
 import { Button } from "@/components/ui/Button";
 import { CountdownBadge } from "@/components/ui/CountdownBadge";
 import { EmptyState } from "@/components/ui/EmptyState";
+import { ActivityFeed, type ActivityItem } from "@/components/group/ActivityFeed";
 import { Calendar, Flame, Award, Layers } from "lucide-react";
 import { monthRangeInTz, todayInTz } from "@/lib/time";
 import Link from "next/link";
@@ -52,6 +53,59 @@ export default async function UserDashboardPage() {
     .eq("user_id", profile.id)
     .order("created_at", { ascending: false })
     .limit(5);
+
+  // Fetch today's approved check-ins across all user's groups (for activity feed)
+  const myGroupIds = groupsWithStats?.map((g: GroupWithStats) => g.id) ?? [];
+  let activityItems: ActivityItem[] = [];
+
+  if (myGroupIds.length > 0) {
+    const today = todayInTz("UTC");
+
+    const { data: todayAllCheckins } = await supabase
+      .from("check_ins")
+      .select("id,user_id,method,created_at,group_id,users(name),gym_groups(name)")
+      .in("group_id", myGroupIds)
+      .eq("status", "APPROVED")
+      .eq("checkin_date", today)
+      .order("created_at", { ascending: false })
+      .limit(20);
+
+    const checkInIds = (todayAllCheckins ?? []).map((c) => c.id);
+    let hypeCounts = new Map<string, number>();
+    let userHyped = new Set<string>();
+
+    if (checkInIds.length > 0) {
+      const [{ data: hypeRows }, { data: myHypes }] = await Promise.all([
+        supabase
+          .from("hypes")
+          .select("check_in_id")
+          .in("check_in_id", checkInIds),
+        supabase
+          .from("hypes")
+          .select("check_in_id")
+          .in("check_in_id", checkInIds)
+          .eq("from_user_id", profile.id),
+      ]);
+
+      for (const h of hypeRows ?? []) {
+        hypeCounts.set(h.check_in_id, (hypeCounts.get(h.check_in_id) ?? 0) + 1);
+      }
+      for (const h of myHypes ?? []) {
+        userHyped.add(h.check_in_id);
+      }
+    }
+
+    activityItems = (todayAllCheckins ?? []).map((c: any) => ({
+      id: c.id,
+      user_id: c.user_id,
+      user_name: c.users?.name ?? "Unknown",
+      method: c.method,
+      created_at: c.created_at,
+      hype_count: hypeCounts.get(c.id) ?? 0,
+      user_hyped: userHyped.has(c.id),
+      group_name: c.gym_groups?.name ?? undefined,
+    }));
+  }
 
   const today = todayInTz("UTC");
   const allDates = recentCheckins?.map((c) => c.checkin_date) ?? [];
@@ -137,6 +191,14 @@ export default async function UserDashboardPage() {
               })}
             </div>
           </Card>
+
+          {activityItems.length > 0 && (
+            <ActivityFeed
+              items={activityItems}
+              currentUserId={profile.id}
+              showGroupName
+            />
+          )}
 
           {(badges?.length ?? 0) > 0 && (
             <Card className="space-y-3">

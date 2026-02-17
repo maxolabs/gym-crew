@@ -10,6 +10,7 @@ import { RoutineCard } from "@/components/group/RoutineCard";
 import { CheckInCard } from "@/components/group/CheckInCard";
 import { PendingApprovals } from "@/components/group/PendingApprovals";
 import { GroupInfoSheet } from "@/components/group/GroupInfoSheet";
+import { ActivityFeed, type ActivityItem } from "@/components/group/ActivityFeed";
 
 type Member = {
   user_id: string;
@@ -56,7 +57,8 @@ export function GroupDashboard({
   streak,
   lastMonthWinnerName,
   leaderboard,
-  pending
+  pending,
+  todayActivity
 }: {
   groupId: string;
   groupName: string;
@@ -75,6 +77,7 @@ export function GroupDashboard({
   lastMonthWinnerName: string | null;
   leaderboard: LeaderboardRow[];
   pending: PendingItem[];
+  todayActivity: ActivityItem[];
 }) {
   const [sheetOpen, setSheetOpen] = useState(false);
 
@@ -146,7 +149,15 @@ export function GroupDashboard({
         />
       )}
 
-      <PendingApprovals items={pending} isAdmin={isAdmin} />
+      <ActivityFeed items={todayActivity} currentUserId={userId} />
+
+      <PendingApprovals
+        items={pending}
+        isAdmin={isAdmin}
+        groupId={groupId}
+        timezone={timezone}
+        currentUserId={userId}
+      />
 
       {/* Leaderboard */}
       <Card className="space-y-2">
