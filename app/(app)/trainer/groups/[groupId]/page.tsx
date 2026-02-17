@@ -115,7 +115,13 @@ export default async function TrainerGroupManagePage({
       </div>
 
       {(pending?.length ?? 0) > 0 && (
-        <PendingApprovals items={(pending ?? []) as any} isAdmin={true} />
+        <PendingApprovals
+          items={(pending ?? []) as any}
+          isAdmin={true}
+          groupId={groupId}
+          timezone={tz}
+          currentUserId={profile.id}
+        />
       )}
 
       <Card className="space-y-3">

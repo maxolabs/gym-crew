@@ -7,6 +7,8 @@ import { Button } from "@/components/ui/Button";
 import { supabaseBrowser } from "@/lib/supabase/browser";
 import { useToast } from "@/components/ui/Toast";
 import { humanizeError } from "@/lib/errors";
+import { getStreakForUser } from "@/lib/achievements";
+import { getXPForCheckIn, XP_REWARDS } from "@/lib/xp-config";
 
 type Pending = {
   id: string;
@@ -18,14 +20,20 @@ type Pending = {
 
 export function PendingApprovals({
   items,
-  isAdmin
+  isAdmin,
+  groupId,
+  timezone,
+  currentUserId
 }: {
   items: Pending[];
   isAdmin: boolean;
+  groupId: string;
+  timezone: string;
+  currentUserId: string;
 }) {
   const supabase = supabaseBrowser();
   const router = useRouter();
-  const { push } = useToast();
+  const { push, pushXPGain } = useToast();
 
   const [busyId, setBusyId] = useState<string | null>(null);
 
@@ -68,6 +76,40 @@ export function PendingApprovals({
                         p_check_in_id: x.id
                       });
                       if (error) throw error;
+
+                      // Award XP to the person who got approved (async, don't wait)
+                      (async () => {
+                        try {
+                          const streak = await getStreakForUser(supabase, x.user_id, groupId, timezone);
+                          const xpInfo = getXPForCheckIn("MANUAL", streak);
+                          await supabase.rpc("award_xp", {
+                            p_user_id: x.user_id,
+                            p_amount: xpInfo.baseXP,
+                            p_source: "checkin",
+                            p_source_id: x.id,
+                            p_multiplier: xpInfo.multiplier
+                          });
+                        } catch (err) {
+                          console.error("Failed to award XP to approved user:", err);
+                        }
+                      })();
+
+                      // Award small XP to the approver
+                      (async () => {
+                        try {
+                          await supabase.rpc("award_xp", {
+                            p_user_id: currentUserId,
+                            p_amount: XP_REWARDS.APPROVE_CHECKIN,
+                            p_source: "approval",
+                            p_source_id: x.id,
+                            p_multiplier: 1.0
+                          });
+                          pushXPGain({ amount: XP_REWARDS.APPROVE_CHECKIN });
+                        } catch (err) {
+                          console.error("Failed to award XP to approver:", err);
+                        }
+                      })();
+
                       push({ type: "success", message: "Approved." });
                       router.refresh();
                     } catch (e: any) {
@@ -113,6 +155,9 @@ export function PendingApprovals({
     </Card>
   );
 }
+
+
+
 
 
 

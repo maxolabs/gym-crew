@@ -17,8 +17,11 @@ import {
   Star,
   Footprints,
   Users,
+  Zap,
+  Sparkles,
   type LucideIcon
 } from "lucide-react";
+import { getLevelColorClass, getLevelBgClass, getLevelBorderClass } from "@/lib/xp-config";
 
 const iconMap: Record<string, LucideIcon> = {
   Flame, Crown, Target, Medal, Trophy, Sunrise, Moon, Calendar, CheckCircle, Star, Footprints, Users
@@ -32,16 +35,31 @@ type AchievementToast = {
   xp: number;
 };
 
+type XPGainToast = {
+  amount: number;
+  multiplier?: number;
+};
+
+type LevelUpToast = {
+  newLevel: number;
+  title: string;
+  color: string;
+};
+
 type ToastItem = {
   id: string;
-  type: "success" | "error" | "info" | "achievement";
+  type: "success" | "error" | "info" | "achievement" | "xp" | "levelup";
   message?: string;
   achievement?: AchievementToast;
+  xpGain?: XPGainToast;
+  levelUp?: LevelUpToast;
 };
 
 type ToastCtx = {
   push: (t: Omit<ToastItem, "id">) => void;
   pushAchievement: (a: AchievementToast) => void;
+  pushXPGain: (x: XPGainToast) => void;
+  pushLevelUp: (l: LevelUpToast) => void;
 };
 
 const Ctx = createContext<ToastCtx | null>(null);
@@ -104,7 +122,32 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
     }, 5000);
   }, []);
 
-  const value = useMemo(() => ({ push, pushAchievement }), [push, pushAchievement]);
+  const pushXPGain = useCallback((x: XPGainToast) => {
+    const id = crypto.randomUUID();
+    setItems((p) => [...p, { id, type: "xp", xpGain: x }]);
+    window.setTimeout(() => {
+      setItems((p) => p.filter((i) => i.id !== id));
+    }, 2500);
+  }, []);
+
+  const pushLevelUp = useCallback((l: LevelUpToast) => {
+    const id = crypto.randomUUID();
+    setItems((p) => [...p, { id, type: "levelup", levelUp: l }]);
+
+    // Trigger confetti for level up
+    const confettiId = crypto.randomUUID();
+    setConfetti((p) => [...p, confettiId]);
+    window.setTimeout(() => {
+      setConfetti((p) => p.filter((c) => c !== confettiId));
+    }, 3000);
+
+    // Level up toasts stay longer
+    window.setTimeout(() => {
+      setItems((p) => p.filter((i) => i.id !== id));
+    }, 6000);
+  }, []);
+
+  const value = useMemo(() => ({ push, pushAchievement, pushXPGain, pushLevelUp }), [push, pushAchievement, pushXPGain, pushLevelUp]);
 
   return (
     <Ctx.Provider value={value}>
@@ -184,6 +227,68 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
                         </span>
                       </div>
                       <p className="text-xs text-muted">{a.name}</p>
+                    </div>
+                  </div>
+                </div>
+              );
+            }
+
+            // XP Gain Toast
+            if (t.type === "xp" && t.xpGain) {
+              const x = t.xpGain;
+              const hasMultiplier = x.multiplier && x.multiplier > 1;
+
+              return (
+                <div
+                  key={t.id}
+                  className="flex items-center justify-center gap-2 rounded-full border border-accent/30 bg-accent/10 px-4 py-2 text-accent shadow-lg animate-in slide-in-from-top-2"
+                  role="status"
+                >
+                  <Zap className="h-4 w-4" />
+                  <span className="font-bold">+{x.amount} XP</span>
+                  {hasMultiplier && (
+                    <span className="rounded-full bg-accent/20 px-2 py-0.5 text-xs font-medium">
+                      {x.multiplier}x streak!
+                    </span>
+                  )}
+                </div>
+              );
+            }
+
+            // Level Up Toast
+            if (t.type === "levelup" && t.levelUp) {
+              const l = t.levelUp;
+
+              return (
+                <div
+                  key={t.id}
+                  className={cn(
+                    "relative overflow-hidden rounded-2xl border bg-card px-4 py-4 shadow-lg animate-in slide-in-from-top-2",
+                    getLevelBorderClass(l.color)
+                  )}
+                  role="status"
+                >
+                  <div className="flex items-center gap-4">
+                    <div
+                      className={cn(
+                        "flex h-14 w-14 shrink-0 items-center justify-center rounded-full border-2",
+                        getLevelBgClass(l.color),
+                        getLevelBorderClass(l.color)
+                      )}
+                    >
+                      <span className={cn("text-xl font-bold", getLevelColorClass(l.color))}>
+                        {l.newLevel}
+                      </span>
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2">
+                        <Sparkles className={cn("h-4 w-4", getLevelColorClass(l.color))} />
+                        <p className="text-sm font-bold">Level Up!</p>
+                        <Sparkles className={cn("h-4 w-4", getLevelColorClass(l.color))} />
+                      </div>
+                      <p className={cn("text-lg font-semibold", getLevelColorClass(l.color))}>
+                        {l.title}
+                      </p>
                     </div>
                   </div>
                 </div>

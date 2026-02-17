@@ -13,6 +13,7 @@ import {
   getStreakForUser,
   getTotalCheckInsForUser
 } from "@/lib/achievements";
+import { getXPForCheckIn, XP_REWARDS } from "@/lib/xp-config";
 
 type Location = {
   id: string;
@@ -31,7 +32,7 @@ type Props = {
 
 export function CheckInCard({ groupId, timezone, userId, locations }: Props) {
   const supabase = supabaseBrowser();
-  const { push, pushAchievement } = useToast();
+  const { push, pushAchievement, pushXPGain, pushLevelUp } = useToast();
 
   const [loading, setLoading] = useState(true); // Start true to prevent actions before status is loaded
   const [todayStatus, setTodayStatus] = useState<null | {
@@ -73,16 +74,48 @@ export function CheckInCard({ groupId, timezone, userId, locations }: Props) {
     setTodayStatus({ status: "PENDING", method: "MANUAL" });
   };
 
-  const checkAchievements = async (isApproved: boolean) => {
+  const handlePostCheckIn = async (isApproved: boolean, method: "GEO" | "MANUAL", checkInId?: string) => {
     if (!isApproved) return;
 
     try {
-      // Get stats for achievement context
+      // Get stats for achievement context and XP calculation
       const [streak, totalCheckIns] = await Promise.all([
         getStreakForUser(supabase, userId, groupId, timezone),
         getTotalCheckInsForUser(supabase, userId, groupId)
       ]);
 
+      // Award XP for check-in
+      const xpInfo = getXPForCheckIn(method, streak);
+      const { data: xpResult } = await supabase.rpc("award_xp", {
+        p_user_id: userId,
+        p_amount: xpInfo.baseXP,
+        p_source: "checkin",
+        p_source_id: checkInId ?? null,
+        p_multiplier: xpInfo.multiplier
+      });
+
+      const result = (xpResult as any)?.[0];
+      if (result) {
+        // Show XP gain toast
+        pushXPGain({
+          amount: xpInfo.totalXP,
+          multiplier: xpInfo.multiplier > 1 ? xpInfo.multiplier : undefined
+        });
+
+        // Show level up toast if leveled up
+        if (result.leveled_up) {
+          // Small delay so XP toast shows first
+          setTimeout(() => {
+            pushLevelUp({
+              newLevel: result.new_level,
+              title: result.level_title,
+              color: result.level_color
+            });
+          }, 500);
+        }
+      }
+
+      // Check achievements
       const awarded = await checkAndAwardAchievements(supabase, userId, groupId, {
         currentStreak: streak,
         totalCheckIns,
@@ -90,19 +123,21 @@ export function CheckInCard({ groupId, timezone, userId, locations }: Props) {
         isFirstCheckIn: totalCheckIns === 1
       });
 
-      // Show achievement toast for first awarded
+      // Show achievement toast for first awarded (after XP toast)
       if (awarded.length > 0) {
-        pushAchievement({
-          name: awarded[0].name,
-          description: awarded[0].description,
-          icon: awarded[0].icon,
-          rarity: awarded[0].rarity,
-          xp: awarded[0].xp
-        });
+        setTimeout(() => {
+          pushAchievement({
+            name: awarded[0].name,
+            description: awarded[0].description,
+            icon: awarded[0].icon,
+            rarity: awarded[0].rarity,
+            xp: awarded[0].xp
+          });
+        }, result?.leveled_up ? 1000 : 500);
       }
     } catch (err) {
-      // Silently fail - achievements are not critical
-      console.error("Failed to check achievements:", err);
+      // Silently fail - XP and achievements are not critical
+      console.error("Failed to process post-check-in rewards:", err);
     }
   };
 
@@ -130,20 +165,24 @@ export function CheckInCard({ groupId, timezone, userId, locations }: Props) {
       return false;
     }
 
-    const { error } = await supabase.from("check_ins").insert({
-      group_id: groupId,
-      user_id: userId,
-      checkin_date: today,
-      method: "GEO",
-      status: "APPROVED",
-      lat,
-      lng
-    });
+    const { data: inserted, error } = await supabase
+      .from("check_ins")
+      .insert({
+        group_id: groupId,
+        user_id: userId,
+        checkin_date: today,
+        method: "GEO",
+        status: "APPROVED",
+        lat,
+        lng
+      })
+      .select("id")
+      .single();
     if (error) throw error;
     setTodayStatus({ status: "APPROVED", method: "GEO" });
 
-    // Check for achievements after successful GPS check-in
-    checkAchievements(true);
+    // Award XP and check for achievements after successful GPS check-in
+    handlePostCheckIn(true, "GEO", inserted?.id);
 
     return true;
   };
