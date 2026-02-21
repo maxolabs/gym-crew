@@ -13,6 +13,7 @@ import { PendingApprovals } from "@/components/group/PendingApprovals";
 import { GroupInfoSheet } from "@/components/group/GroupInfoSheet";
 import { ActivityFeed, type ActivityItem } from "@/components/group/ActivityFeed";
 import { XPProgressBar } from "@/components/xp";
+import type { ActiveRoutine } from "@/lib/routine";
 
 type Member = {
   user_id: string;
@@ -62,7 +63,8 @@ export function GroupDashboard({
   pending,
   todayActivity,
   todayHypesReceived,
-  xpInfo
+  xpInfo,
+  structuredRoutine
 }: {
   groupId: string;
   groupName: string;
@@ -92,6 +94,7 @@ export function GroupDashboard({
     xp_for_next_level: number;
     progress_percent: number;
   } | null;
+  structuredRoutine: ActiveRoutine | null;
 }) {
   const [sheetOpen, setSheetOpen] = useState(false);
 
@@ -170,6 +173,7 @@ export function GroupDashboard({
         routineName={routineName}
         routineDeadline={routineDeadline}
         isAdmin={isAdmin}
+        structuredRoutine={structuredRoutine}
       />
 
       {/* Trainers don't check in - they only approve */}

@@ -5,7 +5,9 @@ import { Card, CardMeta, CardTitle } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { ImageViewer } from "@/components/ui/ImageViewer";
 import { CountdownBadge } from "@/components/ui/CountdownBadge";
-import { AlertTriangle } from "lucide-react";
+import { AlertTriangle, Dumbbell } from "lucide-react";
+import { SessionView } from "@/components/routine/SessionView";
+import type { ActiveRoutine } from "@/lib/routine";
 
 type Props = {
   groupId: string;
@@ -14,6 +16,7 @@ type Props = {
   routineName?: string | null;
   routineDeadline?: string | null;
   isAdmin: boolean;
+  structuredRoutine?: ActiveRoutine | null;
 };
 
 export function RoutineCard({
@@ -22,7 +25,8 @@ export function RoutineCard({
   contentType,
   routineName,
   routineDeadline,
-  isAdmin
+  isAdmin,
+  structuredRoutine
 }: Props) {
   const [viewerOpen, setViewerOpen] = useState(false);
   const isImage = contentType && !contentType.includes("pdf");
@@ -30,8 +34,17 @@ export function RoutineCard({
   const isExpired = routineDeadline && new Date(routineDeadline) < new Date();
   const hasActiveRoutine = routineUrl && !isExpired;
 
-  if (isExpired && !isAdmin) {
+  if (isExpired && !isAdmin && !structuredRoutine) {
     return null;
+  }
+
+  // If there's a structured routine, show that instead of/alongside PDF
+  if (structuredRoutine && structuredRoutine.days.length > 0) {
+    return (
+      <Card className="space-y-3">
+        <SessionView routine={structuredRoutine} groupId={groupId} isAdmin={isAdmin} />
+      </Card>
+    );
   }
 
   return (
