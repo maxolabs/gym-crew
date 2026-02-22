@@ -5,7 +5,7 @@ import { Card, CardMeta, CardTitle } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { Avatar } from "@/components/ui/Avatar";
 import { LogoutButton } from "@/components/auth/LogoutButton";
-import { Award, ChevronRight } from "lucide-react";
+import { Award, ChevronRight, Trophy } from "lucide-react";
 import { AchievementBadge } from "@/components/achievements/AchievementBadge";
 import { LevelBadge, XPProgressBar } from "@/components/xp";
 import type { AchievementDefinition } from "@/lib/achievements/types";
@@ -117,6 +117,25 @@ export default async function ProfilePage() {
             <p className="text-2xl font-bold">{totalApproved ?? 0}</p>
           </div>
         </div>
+      </Card>
+
+      {/* Personal Records */}
+      <Card className="space-y-2">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Trophy className="h-4 w-4 text-warning" />
+            <CardTitle>Personal Records</CardTitle>
+          </div>
+          <Button
+            href="/profile/records"
+            variant="ghost"
+            className="h-8 gap-1 px-2 text-xs text-muted"
+          >
+            View All
+            <ChevronRight className="h-4 w-4" />
+          </Button>
+        </div>
+        <CardMeta>Track your best lifts for each exercise.</CardMeta>
       </Card>
 
       {/* Achievements Section */}

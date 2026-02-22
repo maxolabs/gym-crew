@@ -1,15 +1,12 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { useRouter } from "next/navigation";
 import { Card, CardTitle } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
-import { SetLogger } from "./SetLogger";
 import { CircuitCard } from "./CircuitCard";
-import { getSetsForWeek } from "@/lib/routine";
 import { supabaseBrowser } from "@/lib/supabase/browser";
 import { CheckCircle, Loader2, Calendar, Trophy } from "lucide-react";
-import type { ActiveRoutine, RoutineDay, ExerciseLog } from "@/lib/routine";
+import type { ActiveRoutine, RoutineDay } from "@/lib/routine";
 
 type Props = {
   groupId: string;
@@ -20,10 +17,8 @@ type Props = {
 };
 
 export function WorkoutSession({ groupId, routine, day, currentWeek, userId }: Props) {
-  const router = useRouter();
   const supabase = supabaseBrowser();
   const [sessionId, setSessionId] = useState<string | null>(null);
-  const [logs, setLogs] = useState<ExerciseLog[]>([]);
   const [completing, setCompleting] = useState(false);
   const [completed, setCompleted] = useState(false);
   const [xpAwarded, setXpAwarded] = useState(0);
@@ -39,16 +34,6 @@ export function WorkoutSession({ groupId, routine, day, currentWeek, userId }: P
 
     if (data && !error) {
       setSessionId(data as string);
-
-      // Fetch existing logs for this session
-      const { data: existingLogs } = await supabase
-        .from("exercise_logs")
-        .select("*")
-        .eq("session_id", data);
-
-      if (existingLogs) {
-        setLogs(existingLogs as ExerciseLog[]);
-      }
 
       // Check if already completed
       const { data: session } = await supabase
@@ -67,45 +52,6 @@ export function WorkoutSession({ groupId, routine, day, currentWeek, userId }: P
   useEffect(() => {
     startSession();
   }, [startSession]);
-
-  async function handleLogSet(
-    circuitExerciseId: string,
-    setNumber: number,
-    weightKg: number,
-    repsDone: number
-  ) {
-    if (!sessionId) return;
-
-    const { data } = await supabase.rpc("log_exercise_set", {
-      p_session_id: sessionId,
-      p_circuit_exercise_id: circuitExerciseId,
-      p_set_number: setNumber,
-      p_weight_kg: weightKg,
-      p_reps_done: repsDone,
-    });
-
-    if (data) {
-      // Update local logs
-      setLogs((prev) => {
-        const filtered = prev.filter(
-          (l) =>
-            !(l.circuit_exercise_id === circuitExerciseId && l.set_number === setNumber)
-        );
-        return [
-          ...filtered,
-          {
-            id: data as string,
-            session_id: sessionId,
-            circuit_exercise_id: circuitExerciseId,
-            set_number: setNumber,
-            weight_kg: weightKg,
-            reps_done: repsDone,
-            notes: null,
-          },
-        ];
-      });
-    }
-  }
 
   async function handleComplete() {
     if (!sessionId) return;
@@ -170,25 +116,9 @@ export function WorkoutSession({ groupId, routine, day, currentWeek, userId }: P
         </span>
       </div>
 
-      {day.circuits.map((circuit) => {
-        const sets = getSetsForWeek(circuit.weekly_sets, currentWeek);
-        return (
-          <div key={circuit.id} className="space-y-1.5">
-            <CircuitCard circuit={circuit} currentWeek={currentWeek} />
-            {circuit.exercises.map((ex) => (
-              <SetLogger
-                key={ex.id}
-                exerciseName={ex.exercise_name}
-                circuitExerciseId={ex.id}
-                setsCount={sets}
-                reps={ex.reps}
-                existingLogs={logs}
-                onLogSet={handleLogSet}
-              />
-            ))}
-          </div>
-        );
-      })}
+      {day.circuits.map((circuit) => (
+        <CircuitCard key={circuit.id} circuit={circuit} currentWeek={currentWeek} />
+      ))}
 
       <Button
         onClick={handleComplete}
