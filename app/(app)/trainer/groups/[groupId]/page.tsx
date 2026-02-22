@@ -126,8 +126,23 @@ export default async function TrainerGroupManagePage({
 
       <Card className="space-y-3">
         <div className="flex items-center justify-between">
+          <CardTitle>Structured Routine</CardTitle>
+          <Button
+            href={`/g/${groupId}/routine/builder`}
+            variant="secondary"
+          >
+            Build Routine
+          </Button>
+        </div>
+        <p className="text-xs text-muted">
+          Create a multi-day, multi-circuit routine with weekly progression for your clients.
+        </p>
+      </Card>
+
+      <Card className="space-y-3">
+        <div className="flex items-center justify-between">
           <div>
-            <CardTitle>Routine</CardTitle>
+            <CardTitle>PDF Routine</CardTitle>
             {group.routine_name && (
               <CardMeta>{group.routine_name}</CardMeta>
             )}

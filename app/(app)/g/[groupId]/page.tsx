@@ -3,6 +3,7 @@ import { requireUser } from "@/lib/auth";
 import { supabaseServer } from "@/lib/supabase/server";
 import { GroupDashboard } from "@/components/group/GroupDashboard";
 import { computeStreak, monthRangeInTz, prevMonthStartInTz, todayInTz } from "@/lib/time";
+import type { ActiveRoutine } from "@/lib/routine";
 
 export default async function GroupDashboardPage({
   params
@@ -151,6 +152,11 @@ export default async function GroupDashboardPage({
   });
   const xpInfo = (levelInfo as any)?.[0] ?? null;
 
+  // Fetch active structured routine
+  const { data: structuredRoutine } = await supabase.rpc("get_active_routine", {
+    p_group_id: groupId,
+  });
+
   // Count hypes received today by this user (across this group's check-ins)
   const myTodayCheckIn = (todayCheckins ?? []).find((c) => c.user_id === user.id);
   let todayHypesReceived = 0;
@@ -220,6 +226,7 @@ export default async function GroupDashboardPage({
       todayActivity={todayActivity}
       todayHypesReceived={todayHypesReceived}
       xpInfo={xpInfo}
+      structuredRoutine={(structuredRoutine as ActiveRoutine) ?? null}
     />
   );
 }

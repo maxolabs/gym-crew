@@ -1,0 +1,27 @@
+-- Add YouTube tutorial URLs to seeded exercises
+UPDATE public.exercises SET youtube_url = 'https://www.youtube.com/watch?v=rT7DgCr-3pg' WHERE name = 'Bench Press' AND is_global = true;
+UPDATE public.exercises SET youtube_url = 'https://www.youtube.com/watch?v=8iPEnn-ltC8' WHERE name = 'Incline Dumbbell Press' AND is_global = true;
+UPDATE public.exercises SET youtube_url = 'https://www.youtube.com/watch?v=Iwe6AmxVf7o' WHERE name = 'Cable Flyes' AND is_global = true;
+UPDATE public.exercises SET youtube_url = 'https://www.youtube.com/watch?v=IODxDxX7oi4' WHERE name = 'Push-Ups' AND is_global = true;
+UPDATE public.exercises SET youtube_url = 'https://www.youtube.com/watch?v=XvSL_BYBaUQ' WHERE name = 'Pull-Ups' AND is_global = true;
+UPDATE public.exercises SET youtube_url = 'https://www.youtube.com/watch?v=kBWAon7ItDw' WHERE name = 'Barbell Rows' AND is_global = true;
+UPDATE public.exercises SET youtube_url = 'https://www.youtube.com/watch?v=CAwf7n6Luuc' WHERE name = 'Lat Pulldown' AND is_global = true;
+UPDATE public.exercises SET youtube_url = 'https://www.youtube.com/watch?v=GZbfZ033f74' WHERE name = 'Seated Cable Row' AND is_global = true;
+UPDATE public.exercises SET youtube_url = 'https://www.youtube.com/watch?v=roCP6wCXPqo' WHERE name = 'Face Pulls' AND is_global = true;
+UPDATE public.exercises SET youtube_url = 'https://www.youtube.com/watch?v=2yjwXTZQDDI' WHERE name = 'Overhead Press' AND is_global = true;
+UPDATE public.exercises SET youtube_url = 'https://www.youtube.com/watch?v=3VcKaXpzqRo' WHERE name = 'Lateral Raises' AND is_global = true;
+UPDATE public.exercises SET youtube_url = 'https://www.youtube.com/watch?v=XFt0Iq_BPfc' WHERE name = 'Arnold Press' AND is_global = true;
+UPDATE public.exercises SET youtube_url = 'https://www.youtube.com/watch?v=ultWZbUMPL8' WHERE name = 'Barbell Squats' AND is_global = true;
+UPDATE public.exercises SET youtube_url = 'https://www.youtube.com/watch?v=jEy_czb3RKA' WHERE name = 'Romanian Deadlifts' AND is_global = true;
+UPDATE public.exercises SET youtube_url = 'https://www.youtube.com/watch?v=IZxyjW7MPJQ' WHERE name = 'Leg Press' AND is_global = true;
+UPDATE public.exercises SET youtube_url = 'https://www.youtube.com/watch?v=QOVaHwm-Q6U' WHERE name = 'Lunges' AND is_global = true;
+UPDATE public.exercises SET youtube_url = 'https://www.youtube.com/watch?v=4la6BovYpOk' WHERE name = 'Bulgarian Split Squats' AND is_global = true;
+UPDATE public.exercises SET youtube_url = 'https://www.youtube.com/watch?v=SEdqd1n0cvg' WHERE name = 'Hip Thrusts' AND is_global = true;
+UPDATE public.exercises SET youtube_url = 'https://www.youtube.com/watch?v=kwG2ipFRgFo' WHERE name = 'Barbell Curls' AND is_global = true;
+UPDATE public.exercises SET youtube_url = 'https://www.youtube.com/watch?v=2-LAMcpzODU' WHERE name = 'Tricep Pushdowns' AND is_global = true;
+UPDATE public.exercises SET youtube_url = 'https://www.youtube.com/watch?v=zC3nLlEvin4' WHERE name = 'Hammer Curls' AND is_global = true;
+UPDATE public.exercises SET youtube_url = 'https://www.youtube.com/watch?v=d_KZxkY_0cM' WHERE name = 'Skull Crushers' AND is_global = true;
+UPDATE public.exercises SET youtube_url = 'https://www.youtube.com/watch?v=2z8JmcrW-As' WHERE name = 'Dips' AND is_global = true;
+UPDATE public.exercises SET youtube_url = 'https://www.youtube.com/watch?v=ASdvN_XEl_c' WHERE name = 'Plank' AND is_global = true;
+UPDATE public.exercises SET youtube_url = 'https://www.youtube.com/watch?v=wl4X6dUp_rI' WHERE name = 'Russian Twists' AND is_global = true;
+UPDATE public.exercises SET youtube_url = 'https://www.youtube.com/watch?v=hdng3Nm1x_E' WHERE name = 'Hanging Leg Raises' AND is_global = true;
