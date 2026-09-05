@@ -1,0 +1,9 @@
+{
+  "greeting": "Hola, {{name}}",
+  "noGroupsTitle": "Sin grupos aún",
+  "noGroupsDesc": "Únete al grupo de un entrenador para comenzar tu camino fitness.",
+  "findGroups": "Buscar grupos",
+  "todaysCheckins": "Asistencias de hoy",
+  "recentBadges": "Insignias recientes",
+  "by": "por {{name}}"
+}

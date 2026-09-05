@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 
@@ -12,6 +13,7 @@ type BeforeInstallPromptEvent = Event & {
 export function InstallPrompt() {
   const [evt, setEvt] = useState<BeforeInstallPromptEvent | null>(null);
   const [dismissed, setDismissed] = useState(false);
+  const { t } = useTranslation("profile");
 
   const canInstall = useMemo(() => !!evt && !dismissed, [evt, dismissed]);
 
@@ -30,8 +32,8 @@ export function InstallPrompt() {
     <div className="fixed inset-x-0 bottom-20 z-40 mx-auto w-full max-w-md px-3">
       <Card className="flex items-center justify-between gap-3">
         <div className="min-w-0">
-          <p className="text-sm font-semibold">Install Gym Crew</p>
-          <p className="text-xs text-muted">Add to your home screen for fast check-ins.</p>
+          <p className="text-sm font-semibold">{t("installApp")}</p>
+          <p className="text-xs text-muted">{t("installHint")}</p>
         </div>
         <div className="flex items-center gap-2">
           <Button
@@ -39,7 +41,7 @@ export function InstallPrompt() {
             onClick={() => setDismissed(true)}
             className="h-10 px-3 text-xs"
           >
-            Not now
+            {t("common:notNow")}
           </Button>
           <Button
             onClick={async () => {
@@ -50,17 +52,10 @@ export function InstallPrompt() {
             }}
             className="h-10 px-3 text-xs"
           >
-            Install
+            {t("common:install")}
           </Button>
         </div>
       </Card>
     </div>
   );
 }
-
-
-
-
-
-
-

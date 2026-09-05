@@ -1,0 +1,9 @@
+{
+  "greeting": "Hey, {{name}}",
+  "noGroupsTitle": "No groups yet",
+  "noGroupsDesc": "Join a trainer's group to get started with your fitness journey.",
+  "findGroups": "Find Groups",
+  "todaysCheckins": "Today's Check-ins",
+  "recentBadges": "Recent Badges",
+  "by": "by {{name}}"
+}

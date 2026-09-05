@@ -1,9 +1,8 @@
 import { requireUser } from "@/lib/auth";
 import { supabaseServer } from "@/lib/supabase/server";
-import { TopBar } from "@/components/nav/TopBar";
 import { Button } from "@/components/ui/Button";
-import { Card, CardMeta, CardTitle } from "@/components/ui/Card";
 import { RoutineUploader } from "@/components/group/RoutineUploader";
+import { RoutinePageContent } from "@/components/group/RoutinePageContent";
 
 export default async function RoutinePage({
   params
@@ -38,40 +37,14 @@ export default async function RoutinePage({
   }
 
   return (
-    <div className="space-y-3">
-      <TopBar
-        title="Manage Routine"
-        right={
-          <Button href={`/g/${groupId}`} variant="ghost">
-            Back
-          </Button>
-        }
-      />
-
-      {!isAdmin ? (
-        <Card className="space-y-2">
-          <CardTitle>Admins only</CardTitle>
-          <CardMeta>You don't have permission to upload/replace routines.</CardMeta>
-        </Card>
-      ) : (
-        <Card className="space-y-4">
-          <div>
-            <CardTitle>
-              {group?.routine_url ? "Update Routine" : "Upload Routine"}
-            </CardTitle>
-            <CardMeta>
-              Set a name, deadline, and upload a PDF or image for your clients.
-            </CardMeta>
-          </div>
-          <RoutineUploader
-            groupId={groupId}
-            currentUrl={routineSignedUrl}
-            contentType={group?.routine_content_type ?? null}
-            currentName={group?.routine_name ?? null}
-            currentDeadline={group?.routine_deadline ?? null}
-          />
-        </Card>
-      )}
-    </div>
+    <RoutinePageContent
+      groupId={groupId}
+      isAdmin={isAdmin}
+      hasRoutine={!!group?.routine_url}
+      routineSignedUrl={routineSignedUrl}
+      routineContentType={group?.routine_content_type ?? null}
+      routineName={group?.routine_name ?? null}
+      routineDeadline={group?.routine_deadline ?? null}
+    />
   );
 }

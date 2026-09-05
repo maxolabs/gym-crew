@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Card, CardMeta, CardTitle } from "@/components/ui/Card";
+import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { supabaseBrowser } from "@/lib/supabase/browser";
@@ -40,6 +40,7 @@ export function RoutineUploader({
   const supabase = supabaseBrowser();
   const router = useRouter();
   const { push } = useToast();
+  const { t } = useTranslation("groups");
 
   const [file, setFile] = useState<File | null>(null);
   const [routineName, setRoutineName] = useState(currentName ?? "");
@@ -55,19 +56,19 @@ export function RoutineUploader({
     <div className="space-y-4">
       <div className="space-y-2">
         <label htmlFor="routine-name" className="text-xs text-muted">
-          Routine Name
+          {t("routineName")}
         </label>
         <Input
           id="routine-name"
           value={routineName}
           onChange={(e) => setRoutineName(e.target.value)}
-          placeholder="Week 1 - Upper Body"
+          placeholder={t("routineNamePlaceholder")}
         />
       </div>
 
       <div className="space-y-2">
         <label htmlFor="routine-deadline" className="text-xs text-muted">
-          Deadline
+          {t("deadline")}
         </label>
         <Input
           id="routine-deadline"
@@ -76,15 +77,15 @@ export function RoutineUploader({
           onChange={(e) => setDeadline(e.target.value)}
         />
         <p className="text-xs text-muted">
-          Routine will be hidden from clients after this date.
+          {t("deadlineHint")}
         </p>
       </div>
 
       <div className="space-y-2">
         <label className="text-xs text-muted">
           {hasCurrentRoutine && !isExpired
-            ? "Replace routine file (optional)"
-            : "Routine file"}
+            ? t("replaceFile")
+            : t("routineFile")}
         </label>
         <input
           type="file"
@@ -107,7 +108,7 @@ export function RoutineUploader({
             if (file) {
               const ext = extForMime(file.type);
               if (!ext) {
-                push({ type: "error", message: "Unsupported file type." });
+                push({ type: "error", message: t("unsupportedFile") });
                 return;
               }
 
@@ -137,7 +138,7 @@ export function RoutineUploader({
               .eq("id", groupId);
             if (dbErr) throw dbErr;
 
-            push({ type: "success", message: "Routine updated." });
+            push({ type: "success", message: t("routineUpdated") });
             router.refresh();
           } catch (e: unknown) {
             push({ type: "error", message: humanizeError(e) });
@@ -146,12 +147,8 @@ export function RoutineUploader({
           }
         }}
       >
-        {busy ? "Saving..." : hasCurrentRoutine && !isExpired ? "Update Routine" : "Upload Routine"}
+        {busy ? t("saving") : hasCurrentRoutine && !isExpired ? t("updateRoutine") : t("uploadRoutine")}
       </Button>
     </div>
   );
 }
-
-
-
-

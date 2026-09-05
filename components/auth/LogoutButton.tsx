@@ -2,12 +2,14 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/Button";
 import { supabaseBrowser } from "@/lib/supabase/browser";
 
 export function LogoutButton() {
   const supabase = supabaseBrowser();
   const router = useRouter();
+  const { t } = useTranslation("common");
   const [loading, setLoading] = useState(false);
 
   return (
@@ -26,7 +28,7 @@ export function LogoutButton() {
         }
       }}
     >
-      {loading ? "..." : "Logout"}
+      {loading ? "..." : t("logout")}
     </Button>
   );
 }

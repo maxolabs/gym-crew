@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/cn";
 import { Button } from "./Button";
 import { X } from "lucide-react";
@@ -23,11 +24,12 @@ export function ConfirmDialog({
   onConfirm,
   title,
   description,
-  confirmLabel = "Confirm",
-  cancelLabel = "Cancel",
+  confirmLabel,
+  cancelLabel,
   variant = "primary",
   loading
 }: Props) {
+  const { t } = useTranslation("common");
   const overlayRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -83,7 +85,7 @@ export function ConfirmDialog({
             onClick={onClose}
             disabled={loading}
           >
-            {cancelLabel}
+            {cancelLabel ?? t("cancel")}
           </Button>
           <Button
             variant={variant === "danger" ? "danger" : "primary"}
@@ -91,7 +93,7 @@ export function ConfirmDialog({
             onClick={onConfirm}
             disabled={loading}
           >
-            {loading ? "..." : confirmLabel}
+            {loading ? "..." : (confirmLabel ?? t("confirm"))}
           </Button>
         </div>
       </div>

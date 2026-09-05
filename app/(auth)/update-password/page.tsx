@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslation } from "react-i18next";
 import { Card, CardMeta, CardTitle } from "@/components/ui/Card";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
@@ -13,6 +14,7 @@ export default function UpdatePasswordPage() {
   const supabase = supabaseBrowser();
   const router = useRouter();
   const { push } = useToast();
+  const { t } = useTranslation("auth");
 
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
@@ -20,13 +22,11 @@ export default function UpdatePasswordPage() {
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    // Check if we have a valid session from the reset link
     supabase.auth.onAuthStateChange((event) => {
       if (event === "PASSWORD_RECOVERY") {
         setReady(true);
       }
     });
-    // Also check current session
     supabase.auth.getSession().then(({ data }) => {
       if (data.session) {
         setReady(true);
@@ -40,11 +40,11 @@ export default function UpdatePasswordPage() {
   return (
     <Card className="space-y-4">
       <div>
-        <CardTitle>Set new password</CardTitle>
+        <CardTitle>{t("setNewPassword")}</CardTitle>
         <CardMeta>
           {ready
-            ? "Enter your new password below."
-            : "Loading..."}
+            ? t("enterNewPassword")
+            : t("common:loading")}
         </CardMeta>
       </div>
 
@@ -52,7 +52,7 @@ export default function UpdatePasswordPage() {
         <>
           <div className="space-y-2">
             <label htmlFor="new-password" className="text-xs text-muted">
-              New password
+              {t("newPassword")}
             </label>
             <Input
               id="new-password"
@@ -60,13 +60,13 @@ export default function UpdatePasswordPage() {
               autoComplete="new-password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              placeholder="At least 6 characters"
+              placeholder={t("newPasswordPlaceholder")}
             />
           </div>
 
           <div className="space-y-2">
             <label htmlFor="confirm-password" className="text-xs text-muted">
-              Confirm password
+              {t("confirmPassword")}
             </label>
             <Input
               id="confirm-password"
@@ -74,10 +74,10 @@ export default function UpdatePasswordPage() {
               autoComplete="new-password"
               value={confirm}
               onChange={(e) => setConfirm(e.target.value)}
-              placeholder="Repeat password"
+              placeholder={t("repeatPassword")}
             />
             {confirm && !passwordsMatch ? (
-              <p className="text-xs text-red-400">Passwords don&apos;t match</p>
+              <p className="text-xs text-red-400">{t("passwordsDontMatch")}</p>
             ) : null}
           </div>
 
@@ -91,7 +91,7 @@ export default function UpdatePasswordPage() {
                   password
                 });
                 if (error) throw error;
-                push({ type: "success", message: "Password updated!" });
+                push({ type: "success", message: t("passwordUpdated") });
                 router.replace("/groups");
               } catch (e: any) {
                 push({ type: "error", message: humanizeError(e) });
@@ -100,17 +100,17 @@ export default function UpdatePasswordPage() {
               }
             }}
           >
-            {loading ? "Updating..." : "Update password"}
+            {loading ? t("updating") : t("updatePassword")}
           </Button>
         </>
       ) : (
         <p className="text-sm text-muted">
-          If this page doesn&apos;t load, your reset link may have expired.
+          {t("resetLinkExpired")}
         </p>
       )}
 
       <Button variant="ghost" href="/login" className="h-10 px-0 text-sm">
-        Back to login
+        {t("backToLogin")}
       </Button>
     </Card>
   );

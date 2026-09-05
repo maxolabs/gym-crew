@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/Button";
 import { supabaseBrowser } from "@/lib/supabase/browser";
 import { useToast } from "@/components/ui/Toast";
@@ -18,21 +19,22 @@ export function LeaveGroupButton({ groupId, userId, isAdmin, memberCount }: Prop
   const supabase = supabaseBrowser();
   const router = useRouter();
   const { push } = useToast();
+  const { t } = useTranslation("groups");
   const [loading, setLoading] = useState(false);
 
   const handleLeave = async () => {
     if (isAdmin && memberCount > 1) {
       push({
         type: "error",
-        message: "Admins cannot leave groups with other members. Transfer admin role first or remove other members."
+        message: t("adminCantLeave")
       });
       return;
     }
 
     const confirmed = window.confirm(
       isAdmin && memberCount === 1
-        ? "You are the only member. Leaving will delete this group and all its data. Continue?"
-        : "Are you sure you want to leave this group?"
+        ? t("onlyMemberWarning")
+        : t("leaveConfirm")
     );
 
     if (!confirmed) return;
@@ -48,7 +50,7 @@ export function LeaveGroupButton({ groupId, userId, isAdmin, memberCount }: Prop
 
       if (error) throw error;
 
-      push({ type: "success", message: "You have left the group." });
+      push({ type: "success", message: t("leftGroup") });
       router.replace("/groups");
       router.refresh();
     } catch (e: any) {
@@ -65,7 +67,7 @@ export function LeaveGroupButton({ groupId, userId, isAdmin, memberCount }: Prop
       disabled={loading}
       onClick={handleLeave}
     >
-      {loading ? "Leaving..." : "Leave Group"}
+      {loading ? t("leaving") : t("leaveGroup")}
     </Button>
   );
 }

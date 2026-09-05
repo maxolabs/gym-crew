@@ -1,22 +1,17 @@
 import { requireUserProfile } from "@/lib/auth";
 import { supabaseServer } from "@/lib/supabase/server";
-import { TopBar } from "@/components/nav/TopBar";
-import { Card, CardTitle } from "@/components/ui/Card";
-import { AchievementsGrid } from "@/components/achievements/AchievementsGrid";
-import { LevelBadge, XPProgressBar } from "@/components/xp";
+import { AchievementsContent } from "@/components/achievements/AchievementsContent";
 import type { AchievementDefinition } from "@/lib/achievements/types";
 
 export default async function AchievementsPage() {
   const profile = await requireUserProfile();
   const supabase = await supabaseServer();
 
-  // Fetch all achievement definitions
   const { data: definitions } = await supabase
     .from("achievement_definitions")
     .select("*")
     .order("rarity", { ascending: false });
 
-  // Fetch user's earned achievements and level info in parallel
   const [{ data: earned }, { data: levelData }] = await Promise.all([
     supabase
       .from("user_achievements")
@@ -37,40 +32,10 @@ export default async function AchievementsPage() {
   const earnedIds = new Set((earned ?? []).map((e) => e.achievement_id));
 
   return (
-    <div className="space-y-4">
-      <TopBar title="Achievements" />
-
-      {/* Level Progress Card */}
-      <Card className="space-y-3">
-        <div className="flex items-center gap-4">
-          <LevelBadge
-            level={level.current_level}
-            title={level.level_title}
-            color={level.level_color}
-            size="lg"
-          />
-          <div className="flex-1">
-            <XPProgressBar
-              currentXP={level.total_xp}
-              currentLevel={level.current_level}
-              levelTitle={level.level_title}
-              levelColor={level.level_color}
-              xpForCurrentLevel={level.xp_for_current_level}
-              xpForNextLevel={level.xp_for_next_level}
-              progressPercent={level.progress_percent}
-            />
-          </div>
-        </div>
-      </Card>
-
-      {/* Achievements Grid */}
-      <Card>
-        <CardTitle className="mb-4">All Achievements</CardTitle>
-        <AchievementsGrid
-          definitions={(definitions ?? []) as AchievementDefinition[]}
-          earnedIds={earnedIds}
-        />
-      </Card>
-    </div>
+    <AchievementsContent
+      definitions={(definitions ?? []) as AchievementDefinition[]}
+      earnedIds={earnedIds}
+      level={level}
+    />
   );
 }

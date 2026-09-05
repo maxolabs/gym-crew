@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
+import { useTranslation } from "react-i18next";
 import { MapContainer, TileLayer, Marker, useMapEvents } from "react-leaflet";
 import L from "leaflet";
 import { Button } from "./Button";
@@ -47,6 +48,7 @@ export function MapPicker({
   value: { lat: number; lng: number } | null;
   onChange: (pos: { lat: number; lng: number }) => void;
 }) {
+  const { t } = useTranslation("groups");
   const [gettingLocation, setGettingLocation] = useState(false);
   const [mounted, setMounted] = useState(false);
   const mapRef = useRef<L.Map | null>(null);
@@ -57,7 +59,7 @@ export function MapPicker({
 
   const handleUseMyLocation = () => {
     if (!navigator.geolocation) {
-      alert("Geolocation is not supported by your browser");
+      alert(t("geoNotSupported"));
       return;
     }
 
@@ -72,7 +74,7 @@ export function MapPicker({
         setGettingLocation(false);
       },
       (err) => {
-        alert("Could not get your location: " + err.message);
+        alert(t("geoError", { message: err.message }));
         setGettingLocation(false);
       },
       { enableHighAccuracy: true }
@@ -85,7 +87,7 @@ export function MapPicker({
   if (!mounted) {
     return (
       <div className="h-[250px] w-full rounded-xl border border-white/10 bg-card2 flex items-center justify-center">
-        <p className="text-sm text-muted">Loading map...</p>
+        <p className="text-sm text-muted">{t("loadingMap")}</p>
       </div>
     );
   }
@@ -113,14 +115,14 @@ export function MapPicker({
           disabled={gettingLocation}
           onClick={handleUseMyLocation}
         >
-          {gettingLocation ? "Getting..." : "Use my location"}
+          {gettingLocation ? t("gettingLocation") : t("useMyLocation")}
         </Button>
         {value ? (
           <p className="text-xs text-muted truncate">
             {value.lat.toFixed(5)}, {value.lng.toFixed(5)}
           </p>
         ) : (
-          <p className="text-xs text-muted">Tap map to set location</p>
+          <p className="text-xs text-muted">{t("tapMapToSet")}</p>
         )}
       </div>
     </div>

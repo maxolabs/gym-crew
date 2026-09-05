@@ -2,11 +2,13 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslation } from "react-i18next";
 import { Card, CardMeta, CardTitle } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 
 export default function CurrentGroupPage() {
   const router = useRouter();
+  const { t } = useTranslation(["groups", "errors"]);
 
   useEffect(() => {
     const last = window.localStorage.getItem("gymcrew:lastGroupId");
@@ -15,18 +17,11 @@ export default function CurrentGroupPage() {
 
   return (
     <Card className="space-y-3">
-      <CardTitle>No current group</CardTitle>
-      <CardMeta>Open a group from “Groups” to set it as current.</CardMeta>
+      <CardTitle>{t("groups:noCurrentGroup")}</CardTitle>
+      <CardMeta>{t("groups:noCurrentGroupDesc")}</CardMeta>
       <Button href="/groups" size="lg">
-        Go to Groups
+        {t("errors:goToGroups")}
       </Button>
     </Card>
   );
 }
-
-
-
-
-
-
-

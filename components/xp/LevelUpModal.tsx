@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/cn";
 import { getLevelColorClass, getLevelBgClass, getLevelBorderClass } from "@/lib/xp-config";
 import { Button } from "@/components/ui/Button";
@@ -15,6 +16,7 @@ type Props = {
 };
 
 export function LevelUpModal({ open, onClose, newLevel, title, color }: Props) {
+  const { t } = useTranslation("profile");
   const [showConfetti, setShowConfetti] = useState(false);
 
   useEffect(() => {
@@ -83,7 +85,7 @@ export function LevelUpModal({ open, onClose, newLevel, title, color }: Props) {
           {/* Title */}
           <div className="mb-2 flex items-center justify-center gap-2">
             <Sparkles className={cn("h-5 w-5", getLevelColorClass(color))} />
-            <h2 className="text-xl font-bold">Level Up!</h2>
+            <h2 className="text-xl font-bold">{t("levelUp")}</h2>
             <Sparkles className={cn("h-5 w-5", getLevelColorClass(color))} />
           </div>
 
@@ -106,12 +108,12 @@ export function LevelUpModal({ open, onClose, newLevel, title, color }: Props) {
 
           {/* Encouragement */}
           <p className="mb-6 text-sm text-muted">
-            Keep pushing! You&apos;re making incredible progress.
+            {t("levelUpEncouragement")}
           </p>
 
           {/* Close button */}
           <Button onClick={onClose} className="w-full">
-            Continue
+            {t("common:continue")}
           </Button>
         </div>
       </div>

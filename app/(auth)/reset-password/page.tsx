@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Card, CardMeta, CardTitle } from "@/components/ui/Card";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
@@ -11,6 +12,7 @@ import { humanizeError } from "@/lib/errors";
 export default function ResetPasswordPage() {
   const supabase = supabaseBrowser();
   const { push } = useToast();
+  const { t } = useTranslation("auth");
 
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
@@ -19,11 +21,11 @@ export default function ResetPasswordPage() {
   return (
     <Card className="space-y-4">
       <div>
-        <CardTitle>Reset password</CardTitle>
+        <CardTitle>{t("resetPassword")}</CardTitle>
         <CardMeta>
           {sent
-            ? "Check your email for a reset link."
-            : "Enter your email and we'll send you a reset link."}
+            ? t("resetSent")
+            : t("resetInstructions")}
         </CardMeta>
       </div>
 
@@ -31,7 +33,7 @@ export default function ResetPasswordPage() {
         <>
           <div className="space-y-2">
             <label htmlFor="reset-email" className="text-xs text-muted">
-              Email
+              {t("emailLabel")}
             </label>
             <Input
               id="reset-email"
@@ -57,7 +59,7 @@ export default function ResetPasswordPage() {
                 );
                 if (error) throw error;
                 setSent(true);
-                push({ type: "success", message: "Reset link sent!" });
+                push({ type: "success", message: t("resetLinkSent") });
               } catch (e: any) {
                 push({ type: "error", message: humanizeError(e) });
               } finally {
@@ -65,17 +67,17 @@ export default function ResetPasswordPage() {
               }
             }}
           >
-            {loading ? "Sending..." : "Send reset link"}
+            {loading ? t("sending") : t("sendResetLink")}
           </Button>
         </>
       ) : (
         <p className="text-sm text-muted">
-          Didn&apos;t receive it? Check your spam folder or try again.
+          {t("checkSpam")}
         </p>
       )}
 
       <Button variant="ghost" href="/login" className="h-10 px-0 text-sm">
-        Back to login
+        {t("backToLogin")}
       </Button>
     </Card>
   );

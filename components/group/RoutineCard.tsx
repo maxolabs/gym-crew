@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Card, CardMeta, CardTitle } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { ImageViewer } from "@/components/ui/ImageViewer";
@@ -25,6 +26,7 @@ export function RoutineCard({
   isAdmin
 }: Props) {
   const [viewerOpen, setViewerOpen] = useState(false);
+  const { t } = useTranslation(["groups", "common"]);
   const isImage = contentType && !contentType.includes("pdf");
 
   const isExpired = routineDeadline && new Date(routineDeadline) < new Date();
@@ -38,19 +40,19 @@ export function RoutineCard({
     <Card className="space-y-3">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0 flex-1">
-          <CardTitle>{routineName || "Routine"}</CardTitle>
+          <CardTitle>{routineName || t("common:routine")}</CardTitle>
           {routineDeadline && !isExpired && (
             <div className="mt-1">
               <CountdownBadge deadline={routineDeadline} />
             </div>
           )}
           {!routineUrl && !isExpired && (
-            <CardMeta>No routine uploaded yet.</CardMeta>
+            <CardMeta>{t("groups:noRoutineYet")}</CardMeta>
           )}
         </div>
         {isAdmin && (
           <Button href={`/g/${groupId}/routine`} variant="secondary">
-            {routineUrl ? "Manage" : "Upload"}
+            {routineUrl ? t("common:manage") : t("common:upload")}
           </Button>
         )}
       </div>
@@ -59,9 +61,9 @@ export function RoutineCard({
         <div className="flex items-start gap-3 rounded-xl border border-danger/20 bg-danger/5 p-3">
           <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-danger" />
           <div>
-            <p className="text-sm font-medium text-danger">Routine Expired</p>
+            <p className="text-sm font-medium text-danger">{t("groups:routineExpired")}</p>
             <p className="text-xs text-muted">
-              This routine is no longer visible to clients. Upload a new one to continue.
+              {t("groups:routineExpiredDesc")}
             </p>
           </div>
         </div>
@@ -69,11 +71,11 @@ export function RoutineCard({
 
       {!routineUrl && !isExpired && (
         <div className="rounded-xl border border-white/10 bg-card2 px-3 py-3">
-          <p className="text-sm font-semibold">No routine uploaded</p>
+          <p className="text-sm font-semibold">{t("groups:noRoutineUploaded")}</p>
           <p className="text-xs text-muted">
             {isAdmin
-              ? "Upload a PDF/image so members can follow the plan."
-              : "Ask your trainer to upload the routine."}
+              ? t("groups:uploadRoutineAdmin")
+              : t("groups:uploadRoutineClient")}
           </p>
         </div>
       )}
@@ -82,13 +84,13 @@ export function RoutineCard({
         <div className="space-y-2">
           <div className="overflow-hidden rounded-xl border border-white/10 bg-black">
             <iframe
-              title="Routine PDF"
+              title={t("groups:routinePdf")}
               src={routineUrl}
               className="h-[420px] w-full"
             />
           </div>
           <Button href={routineUrl} variant="ghost" className="h-10 px-0 text-sm">
-            Download / Open
+            {t("groups:downloadOpen")}
           </Button>
         </div>
       )}
@@ -101,11 +103,11 @@ export function RoutineCard({
             className="w-full cursor-zoom-in overflow-hidden rounded-xl border border-white/10 bg-black"
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={routineUrl} alt="Gym routine" className="h-auto w-full" />
+            <img src={routineUrl} alt={t("groups:gymRoutineAlt")} className="h-auto w-full" />
           </button>
-          <p className="text-center text-xs text-muted">Tap image to zoom</p>
+          <p className="text-center text-xs text-muted">{t("groups:tapToZoom")}</p>
           <Button href={routineUrl} variant="ghost" className="h-10 px-0 text-sm">
-            Download / Open
+            {t("groups:downloadOpen")}
           </Button>
         </div>
       )}
@@ -113,7 +115,7 @@ export function RoutineCard({
       {isImage && routineUrl && (
         <ImageViewer
           src={routineUrl}
-          alt="Gym routine"
+          alt={t("groups:gymRoutineAlt")}
           open={viewerOpen}
           onClose={() => setViewerOpen(false)}
         />
@@ -121,7 +123,3 @@ export function RoutineCard({
     </Card>
   );
 }
-
-
-
-

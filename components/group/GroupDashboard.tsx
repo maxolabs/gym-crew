@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslation, Trans } from "react-i18next";
 import { Info } from "lucide-react";
 import { cn } from "@/lib/cn";
 import { TopBar } from "@/components/nav/TopBar";
@@ -94,6 +95,7 @@ export function GroupDashboard({
   } | null;
 }) {
   const [sheetOpen, setSheetOpen] = useState(false);
+  const { t } = useTranslation(["groups", "common"]);
 
   return (
     <div className="space-y-3">
@@ -110,28 +112,27 @@ export function GroupDashboard({
               <Info size={20} />
             </button>
             <Button href="/groups" variant="ghost">
-              Groups
+              {t("common:groups")}
             </Button>
           </div>
         }
       />
 
-      {/* Stats Card - Different for trainers vs clients */}
       <Card className="space-y-2">
         <div className="flex items-center justify-between">
-          <CardTitle>This month</CardTitle>
+          <CardTitle>{t("groups:thisMonth")}</CardTitle>
           <p className="text-xs text-muted">
-            {members.length - 1} client{members.length - 1 !== 1 ? "s" : ""}
+            {t("common:client", { count: members.length - 1 })}
           </p>
         </div>
         {!isAdmin && (
           <div className="grid grid-cols-2 gap-2">
             <div className="rounded-xl border border-white/10 bg-card2 px-3 py-3">
-              <p className="text-xs text-muted">Check-ins</p>
+              <p className="text-xs text-muted">{t("common:checkIns")}</p>
               <p className="text-2xl font-bold">{myMonthCount}</p>
             </div>
             <div className="rounded-xl border border-white/10 bg-card2 px-3 py-3">
-              <p className="text-xs text-muted">Streak</p>
+              <p className="text-xs text-muted">{t("common:streak")}</p>
               <p className="text-2xl font-bold">{streak}</p>
             </div>
           </div>
@@ -140,7 +141,11 @@ export function GroupDashboard({
           <div className="flex items-center gap-2 rounded-xl border border-red-500/20 bg-red-500/5 px-3 py-2">
             <span className="text-base">🔥</span>
             <p className="text-sm text-red-400">
-              You received <span className="font-bold">{todayHypesReceived}</span> hype{todayHypesReceived !== 1 ? "s" : ""} today!
+              <Trans
+                i18nKey="groups:hypeReceived"
+                count={todayHypesReceived}
+                components={{ bold: <span className="font-bold" /> }}
+              />
             </p>
           </div>
         )}
@@ -157,7 +162,7 @@ export function GroupDashboard({
         )}
         {lastMonthWinnerName ? (
           <p className="text-xs text-muted">
-            Last month winner:{" "}
+            {t("groups:lastMonthWinner")}{" "}
             <span className="font-semibold text-text">{lastMonthWinnerName}</span>
           </p>
         ) : null}
@@ -172,7 +177,6 @@ export function GroupDashboard({
         isAdmin={isAdmin}
       />
 
-      {/* Trainers don't check in - they only approve */}
       {!isAdmin && (
         <CheckInCard
           groupId={groupId}
@@ -192,11 +196,10 @@ export function GroupDashboard({
         currentUserId={userId}
       />
 
-      {/* Leaderboard */}
       <Card className="space-y-2">
-        <CardTitle>Leaderboard</CardTitle>
+        <CardTitle>{t("common:leaderboard")}</CardTitle>
         {!leaderboard.length ? (
-          <CardMeta>No check-ins yet this month.</CardMeta>
+          <CardMeta>{t("groups:noCheckInsYet")}</CardMeta>
         ) : (
           <div className="space-y-2">
             {leaderboard.map((row, idx) => {
@@ -234,7 +237,6 @@ export function GroupDashboard({
         )}
       </Card>
 
-      {/* Group Info Sheet */}
       <GroupInfoSheet
         open={sheetOpen}
         onClose={() => setSheetOpen(false)}

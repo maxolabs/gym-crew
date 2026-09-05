@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { supabaseBrowser } from "@/lib/supabase/browser";
 import { useToast } from "@/components/ui/Toast";
 import { HYPE_EMOJI, HYPE_ACHIEVEMENT_THRESHOLDS } from "@/lib/hype-config";
@@ -23,6 +24,7 @@ export function HypeButton({
 }: Props) {
   const supabase = supabaseBrowser();
   const { push, pushAchievement } = useToast();
+  const { t } = useTranslation("groups");
 
   const [count, setCount] = useState(initialCount);
   const [hyped, setHyped] = useState(initialHyped);
@@ -85,7 +87,7 @@ export function HypeButton({
       // Revert optimistic update
       setHyped(false);
       setCount((c) => c - 1);
-      push({ type: "error", message: "Failed to send hype" });
+      push({ type: "error", message: t("failedHype") });
     }
   };
 

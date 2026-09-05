@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/cn";
 import { AchievementBadge } from "./AchievementBadge";
 import type { AchievementCategory, AchievementDefinition } from "@/lib/achievements/types";
@@ -10,24 +11,24 @@ type Props = {
   earnedIds: Set<string>;
 };
 
-const categories: { value: AchievementCategory | "ALL"; label: string }[] = [
-  { value: "ALL", label: "All" },
-  { value: "STREAK", label: "Streak" },
-  { value: "MILESTONE", label: "Milestone" },
-  { value: "TIME", label: "Time" },
-  { value: "CONSISTENCY", label: "Consistency" },
-  { value: "SPECIAL", label: "Special" }
-];
-
 export function AchievementsGrid({ definitions, earnedIds }: Props) {
+  const { t } = useTranslation("profile");
   const [filter, setFilter] = useState<AchievementCategory | "ALL">("ALL");
+
+  const categories: { value: AchievementCategory | "ALL"; label: string }[] = [
+    { value: "ALL", label: t("all") },
+    { value: "STREAK", label: t("streakCategory") },
+    { value: "MILESTONE", label: t("milestone") },
+    { value: "TIME", label: t("time") },
+    { value: "CONSISTENCY", label: t("consistency") },
+    { value: "SPECIAL", label: t("special") }
+  ];
 
   const filtered =
     filter === "ALL"
       ? definitions
       : definitions.filter((d) => d.category === filter);
 
-  // Sort: earned first, then by rarity (legendary > epic > rare > common)
   const rarityOrder: Record<string, number> = {
     LEGENDARY: 0,
     EPIC: 1,
@@ -51,14 +52,12 @@ export function AchievementsGrid({ definitions, earnedIds }: Props) {
 
   return (
     <div className="space-y-4">
-      {/* Header */}
       <div className="flex items-center justify-between">
         <p className="text-sm text-muted">
-          {earnedCount}/{totalCount} Earned
+          {t("earned", { earned: earnedCount, total: totalCount })}
         </p>
       </div>
 
-      {/* Filter tabs */}
       <div className="flex gap-2 overflow-x-auto pb-2">
         {categories.map((cat) => (
           <button
@@ -76,7 +75,6 @@ export function AchievementsGrid({ definitions, earnedIds }: Props) {
         ))}
       </div>
 
-      {/* Grid */}
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         {sorted.map((def) => (
           <AchievementBadge
@@ -89,7 +87,7 @@ export function AchievementsGrid({ definitions, earnedIds }: Props) {
 
       {sorted.length === 0 && (
         <p className="py-8 text-center text-sm text-muted">
-          No achievements in this category.
+          {t("noInCategory")}
         </p>
       )}
     </div>
