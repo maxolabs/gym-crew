@@ -3,17 +3,18 @@
 import { useState } from "react";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
+import { useTranslation } from "react-i18next";
 import { Card, CardMeta, CardTitle } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { supabaseBrowser } from "@/lib/supabase/browser";
 import { useToast } from "@/components/ui/Toast";
 import { humanizeError } from "@/lib/errors";
+import i18n from "@/lib/i18n";
 
-// Dynamically import MapPicker to avoid SSR issues with Leaflet
 const MapPicker = dynamic(
   () => import("@/components/ui/MapPicker").then((mod) => mod.MapPicker),
-  { ssr: false, loading: () => <div className="h-[250px] rounded-xl border border-white/10 bg-card2 flex items-center justify-center"><p className="text-sm text-muted">Loading map...</p></div> }
+  { ssr: false, loading: () => <div className="h-[250px] rounded-xl border border-white/10 bg-card2 flex items-center justify-center"><p className="text-sm text-muted">{i18n.t("groups:loadingMap")}</p></div> }
 );
 
 type Location = {
@@ -38,6 +39,7 @@ export function LocationsManager({
   const supabase = supabaseBrowser();
   const router = useRouter();
   const { push } = useToast();
+  const { t } = useTranslation(["groups", "common"]);
 
   const [name, setName] = useState("");
   const [position, setPosition] = useState<{ lat: number; lng: number } | null>(null);
@@ -48,22 +50,22 @@ export function LocationsManager({
     <div className="space-y-3">
       <Card className="space-y-3">
         <div>
-          <CardTitle>Add location</CardTitle>
-          <CardMeta>Tap on the map to set the gym location.</CardMeta>
+          <CardTitle>{t("groups:addLocation")}</CardTitle>
+          <CardMeta>{t("groups:tapMap")}</CardMeta>
         </div>
 
         <div className="space-y-2">
-          <label htmlFor="loc-name" className="text-xs text-muted">Name</label>
-          <Input id="loc-name" value={name} onChange={(e) => setName(e.target.value)} placeholder="Main gym" />
+          <label htmlFor="loc-name" className="text-xs text-muted">{t("common:name")}</label>
+          <Input id="loc-name" value={name} onChange={(e) => setName(e.target.value)} placeholder={t("groups:mainGymPlaceholder")} />
         </div>
 
         <div className="space-y-2">
-          <label className="text-xs text-muted">Location</label>
+          <label className="text-xs text-muted">{t("groups:locationLabel")}</label>
           <MapPicker value={position} onChange={setPosition} />
         </div>
 
         <div className="space-y-2">
-          <label htmlFor="loc-radius" className="text-xs text-muted">Radius (meters)</label>
+          <label htmlFor="loc-radius" className="text-xs text-muted">{t("groups:radiusMeters")}</label>
           <Input id="loc-radius" value={radius} onChange={(e) => setRadius(e.target.value)} placeholder="500" />
         </div>
 
@@ -78,13 +80,13 @@ export function LocationsManager({
           }
           onClick={async () => {
             if (!position) {
-              push({ type: "error", message: "Please select a location on the map." });
+              push({ type: "error", message: t("groups:selectLocationError") });
               return;
             }
 
             const radiusNum = Number(radius);
             if (!isValidRadius(radiusNum)) {
-              push({ type: "error", message: "Radius must be between 1 and 50,000 meters." });
+              push({ type: "error", message: t("groups:radiusError") });
               return;
             }
 
@@ -98,7 +100,7 @@ export function LocationsManager({
                 radius_m: Math.floor(radiusNum)
               });
               if (error) throw error;
-              push({ type: "success", message: "Location added." });
+              push({ type: "success", message: t("groups:locationAdded") });
               setName("");
               setPosition(null);
               setRadius("500");
@@ -110,14 +112,14 @@ export function LocationsManager({
             }
           }}
         >
-          Add location
+          {t("groups:addLocation")}
         </Button>
       </Card>
 
       <Card className="space-y-2">
-        <CardTitle>Existing locations</CardTitle>
+        <CardTitle>{t("groups:existingLocations")}</CardTitle>
         {!initial.length ? (
-          <CardMeta>No locations yet.</CardMeta>
+          <CardMeta>{t("groups:noLocationsYet")}</CardMeta>
         ) : (
           <div className="space-y-2">
             {initial.map((l) => (
@@ -136,7 +138,7 @@ export function LocationsManager({
                   className="h-10 px-3 text-xs"
                   disabled={busy}
                   onClick={async () => {
-                    if (!confirm(`Delete "${l.name}"?`)) return;
+                    if (!confirm(t("groups:deleteConfirm", { name: l.name }))) return;
                     try {
                       setBusy(true);
                       const { error } = await supabase
@@ -144,7 +146,7 @@ export function LocationsManager({
                         .delete()
                         .eq("id", l.id);
                       if (error) throw error;
-                      push({ type: "success", message: "Deleted." });
+                      push({ type: "success", message: t("groups:deleted") });
                       router.refresh();
                     } catch (e: any) {
                       push({ type: "error", message: humanizeError(e) });
@@ -153,7 +155,7 @@ export function LocationsManager({
                     }
                   }}
                 >
-                  Delete
+                  {t("common:delete")}
                 </Button>
               </div>
             ))}
@@ -163,10 +165,3 @@ export function LocationsManager({
     </div>
   );
 }
-
-
-
-
-
-
-

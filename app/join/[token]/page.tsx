@@ -2,6 +2,7 @@
 
 import { use, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslation } from "react-i18next";
 import { Card, CardMeta, CardTitle } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { supabaseBrowser } from "@/lib/supabase/browser";
@@ -13,6 +14,7 @@ export default function JoinPage({ params }: { params: Promise<{ token: string }
   const supabase = supabaseBrowser();
   const router = useRouter();
   const { push } = useToast();
+  const { t } = useTranslation("auth");
 
   const [loading, setLoading] = useState(true);
   const [authed, setAuthed] = useState(false);
@@ -29,8 +31,8 @@ export default function JoinPage({ params }: { params: Promise<{ token: string }
     return (
       <div className="mx-auto flex min-h-dvh w-full max-w-md items-center px-3 py-10">
         <Card className="w-full space-y-2">
-          <CardTitle>Joining…</CardTitle>
-          <CardMeta>Checking your session.</CardMeta>
+          <CardTitle>{t("joiningTitle")}</CardTitle>
+          <CardMeta>{t("checkingSession")}</CardMeta>
         </Card>
       </div>
     );
@@ -40,13 +42,13 @@ export default function JoinPage({ params }: { params: Promise<{ token: string }
     return (
       <div className="mx-auto flex min-h-dvh w-full max-w-md items-center px-3 py-10">
         <Card className="w-full space-y-3">
-          <CardTitle>Sign in to join</CardTitle>
-          <CardMeta>This invite link requires an account.</CardMeta>
+          <CardTitle>{t("signInToJoin")}</CardTitle>
+          <CardMeta>{t("inviteRequiresAccount")}</CardMeta>
           <Button href={`/login?next=${encodeURIComponent(`/join/${token}`)}`} size="lg">
-            Sign in
+            {t("signIn")}
           </Button>
           <Button href="/register" variant="secondary" size="lg">
-            Create account
+            {t("createAccount")}
           </Button>
         </Card>
       </div>
@@ -56,8 +58,8 @@ export default function JoinPage({ params }: { params: Promise<{ token: string }
   return (
     <div className="mx-auto flex min-h-dvh w-full max-w-md items-center px-3 py-10">
       <Card className="w-full space-y-3">
-        <CardTitle>Join this group?</CardTitle>
-        <CardMeta>We’ll add you as a member.</CardMeta>
+        <CardTitle>{t("joinThisGroup")}</CardTitle>
+        <CardMeta>{t("wellAddYou")}</CardMeta>
         <Button
           size="lg"
           onClick={async () => {
@@ -69,7 +71,7 @@ export default function JoinPage({ params }: { params: Promise<{ token: string }
               if (error) throw error;
               const groupId = data as string;
               window.localStorage.setItem("gymcrew:lastGroupId", groupId);
-              push({ type: "success", message: "Joined!" });
+              push({ type: "success", message: t("joined") });
               router.replace(`/g/${groupId}`);
             } catch (e: any) {
               push({ type: "error", message: humanizeError(e) });
@@ -79,19 +81,12 @@ export default function JoinPage({ params }: { params: Promise<{ token: string }
           }}
           disabled={loading}
         >
-          {loading ? "Joining..." : "Join Group"}
+          {loading ? t("joining") : t("joinGroup")}
         </Button>
         <Button href="/groups" variant="ghost" className="h-10 px-0 text-sm">
-          Cancel
+          {t("common:cancel")}
         </Button>
       </Card>
     </div>
   );
 }
-
-
-
-
-
-
-

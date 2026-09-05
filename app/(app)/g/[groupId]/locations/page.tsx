@@ -1,9 +1,7 @@
 import { requireUser } from "@/lib/auth";
 import { supabaseServer } from "@/lib/supabase/server";
-import { TopBar } from "@/components/nav/TopBar";
-import { Button } from "@/components/ui/Button";
-import { Card, CardMeta, CardTitle } from "@/components/ui/Card";
 import { LocationsManager } from "@/components/group/LocationsManager";
+import { LocationsPageContent } from "@/components/group/LocationsPageContent";
 
 export default async function LocationsPage({
   params
@@ -30,26 +28,10 @@ export default async function LocationsPage({
     .order("created_at", { ascending: true });
 
   return (
-    <div className="space-y-3">
-      <TopBar
-        title="Locations"
-        right={
-          <Button href={`/g/${groupId}`} variant="ghost">
-            Back
-          </Button>
-        }
-      />
-
-      {!isAdmin ? (
-        <Card className="space-y-2">
-          <CardTitle>Admins only</CardTitle>
-          <CardMeta>You don’t have permission to manage locations.</CardMeta>
-        </Card>
-      ) : (
-        <LocationsManager groupId={groupId} initial={(locations ?? []) as any} />
-      )}
-    </div>
+    <LocationsPageContent
+      groupId={groupId}
+      isAdmin={isAdmin}
+      locations={(locations ?? []) as any}
+    />
   );
 }
-
-

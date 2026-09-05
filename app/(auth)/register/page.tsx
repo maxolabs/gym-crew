@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslation } from "react-i18next";
 import { Card, CardMeta, CardTitle } from "@/components/ui/Card";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
@@ -18,6 +19,7 @@ export default function RegisterPage() {
   const supabase = supabaseBrowser();
   const router = useRouter();
   const { push } = useToast();
+  const { t } = useTranslation(["auth", "common"]);
 
   const [step, setStep] = useState<Step>("role");
   const [selectedRole, setSelectedRole] = useState<UserType | null>(null);
@@ -45,7 +47,7 @@ export default function RegisterPage() {
 
       push({
         type: "success",
-        message: "Account created successfully!"
+        message: t("auth:accountCreated")
       });
 
       if (selectedRole === "TRAINER") {
@@ -64,8 +66,8 @@ export default function RegisterPage() {
     return (
       <Card className="space-y-6">
         <div>
-          <CardTitle>Choose your role</CardTitle>
-          <CardMeta>This choice is permanent and cannot be changed.</CardMeta>
+          <CardTitle>{t("auth:chooseRole")}</CardTitle>
+          <CardMeta>{t("auth:rolePermanent")}</CardMeta>
         </div>
 
         <div className="space-y-3">
@@ -73,15 +75,15 @@ export default function RegisterPage() {
             selected={selectedRole === "USER"}
             onSelect={() => setSelectedRole("USER")}
             icon={<User className="h-6 w-6" />}
-            title="I'm a Client"
-            description="Join a trainer's group, follow routines, and track your check-ins."
+            title={t("auth:imClient")}
+            description={t("auth:clientRoleDesc")}
           />
           <RoleCard
             selected={selectedRole === "TRAINER"}
             onSelect={() => setSelectedRole("TRAINER")}
             icon={<Dumbbell className="h-6 w-6" />}
-            title="I'm a Trainer"
-            description="Create groups, manage clients, upload routines, and track progress."
+            title={t("auth:imTrainer")}
+            description={t("auth:trainerRoleDesc")}
           />
         </div>
 
@@ -91,11 +93,11 @@ export default function RegisterPage() {
           onClick={() => setStep("details")}
           className="w-full"
         >
-          Continue
+          {t("common:continue")}
         </Button>
 
         <Button variant="ghost" href="/login" className="h-10 w-full px-0 text-sm">
-          Already have an account? Sign in
+          {t("auth:alreadyHaveAccount")}
         </Button>
       </Card>
     );
@@ -109,30 +111,30 @@ export default function RegisterPage() {
           className="mb-2 flex items-center gap-1 text-sm text-muted hover:text-text"
         >
           <ArrowLeft className="h-4 w-4" />
-          Back
+          {t("common:back")}
         </button>
-        <CardTitle>Create your account</CardTitle>
+        <CardTitle>{t("auth:createYourAccount")}</CardTitle>
         <CardMeta>
           {selectedRole === "TRAINER"
-            ? "Set up your trainer account to start managing clients."
-            : "Set up your account to join a trainer's group."}
+            ? t("auth:trainerAccountSetup")
+            : t("auth:clientAccountSetup")}
         </CardMeta>
       </div>
 
       <div className="space-y-2">
         <label htmlFor="register-name" className="text-xs text-muted">
-          Name
+          {t("auth:nameLabel")}
         </label>
         <Input
           id="register-name"
           value={name}
           onChange={(e) => setName(e.target.value)}
-          placeholder="Your name"
+          placeholder={t("auth:namePlaceholder")}
         />
       </div>
       <div className="space-y-2">
         <label htmlFor="register-email" className="text-xs text-muted">
-          Email
+          {t("auth:emailLabel")}
         </label>
         <Input
           id="register-email"
@@ -145,7 +147,7 @@ export default function RegisterPage() {
       </div>
       <div className="space-y-2">
         <label htmlFor="register-password" className="text-xs text-muted">
-          Password
+          {t("auth:passwordLabel")}
         </label>
         <Input
           id="register-password"
@@ -153,7 +155,7 @@ export default function RegisterPage() {
           autoComplete="new-password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          placeholder="At least 8 characters"
+          placeholder={t("auth:passwordPlaceholder")}
         />
       </div>
 
@@ -163,16 +165,12 @@ export default function RegisterPage() {
         onClick={handleSignUp}
         className="w-full"
       >
-        {loading ? "Creating..." : "Create Account"}
+        {loading ? t("auth:creating") : t("auth:createAccountBtn")}
       </Button>
 
       <Button variant="ghost" href="/login" className="h-10 w-full px-0 text-sm">
-        Already have an account? Sign in
+        {t("auth:alreadyHaveAccount")}
       </Button>
     </Card>
   );
 }
-
-
-
-

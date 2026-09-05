@@ -1,15 +1,8 @@
 import { requireUserProfile } from "@/lib/auth";
 import { supabaseServer } from "@/lib/supabase/server";
-import { TopBar } from "@/components/nav/TopBar";
-import { Card, CardMeta, CardTitle } from "@/components/ui/Card";
-import { StatsCard } from "@/components/ui/StatsCard";
-import { Button } from "@/components/ui/Button";
-import { CountdownBadge } from "@/components/ui/CountdownBadge";
-import { EmptyState } from "@/components/ui/EmptyState";
-import { ActivityFeed, type ActivityItem } from "@/components/group/ActivityFeed";
-import { Calendar, Flame, Award, Layers } from "lucide-react";
+import { DashboardContent } from "@/components/dashboard/DashboardContent";
+import type { ActivityItem } from "@/components/group/ActivityFeed";
 import { computeStreak, monthRangeInTz, todayInTz } from "@/lib/time";
-import Link from "next/link";
 import type { Database } from "@/lib/supabase/types";
 
 type GroupWithStats = Database["public"]["Functions"]["get_my_groups_with_stats"]["Returns"][number];
@@ -105,118 +98,15 @@ export default async function UserDashboardPage() {
   );
 
   return (
-    <div className="space-y-4">
-      <TopBar title={`Hey, ${profile.name.split(" ")[0]}`} />
-
-      <div className="grid grid-cols-3 gap-2">
-        <StatsCard
-          icon={<Calendar className="h-4 w-4" />}
-          value={totalMonthCheckins}
-          label="This Month"
-        />
-        <StatsCard
-          icon={<Flame className="h-4 w-4" />}
-          value={globalStreak}
-          label="Day Streak"
-        />
-        <StatsCard
-          icon={<Award className="h-4 w-4" />}
-          value={badges?.length ?? 0}
-          label="Badges"
-        />
-      </div>
-
-      {!groupsWithStats?.length ? (
-        <EmptyState
-          icon={<Layers className="h-7 w-7" />}
-          title="No groups yet"
-          description="Join a trainer's group to get started with your fitness journey."
-          action={
-            <Button href="/groups">Find Groups</Button>
-          }
-        />
-      ) : (
-        <>
-          <Card className="space-y-3">
-            <CardTitle>Today's Check-ins</CardTitle>
-            <div className="space-y-2">
-              {groupsWithStats.map((g: GroupWithStats) => {
-                const checkedIn = todayCheckedGroups.has(g.id);
-                const hasActiveRoutine =
-                  g.routine_deadline && new Date(g.routine_deadline) > new Date();
-
-                return (
-                  <Link
-                    key={g.id}
-                    href={`/g/${g.id}`}
-                    className="flex items-center justify-between rounded-xl border border-white/10 bg-card2 p-3 transition-colors hover:bg-white/5"
-                  >
-                    <div className="min-w-0 flex-1">
-                      <p className="truncate font-medium text-text">{g.name}</p>
-                      <p className="text-xs text-muted">
-                        by {g.trainer_name}
-                        {g.routine_name && ` • ${g.routine_name}`}
-                      </p>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      {hasActiveRoutine && g.routine_deadline && (
-                        <CountdownBadge deadline={g.routine_deadline} />
-                      )}
-                      {checkedIn ? (
-                        <span className="rounded-full bg-success/10 px-2.5 py-1 text-xs font-medium text-success">
-                          Done
-                        </span>
-                      ) : (
-                        <Button variant="primary" className="h-8 px-3 text-xs">
-                          Check In
-                        </Button>
-                      )}
-                    </div>
-                  </Link>
-                );
-              })}
-            </div>
-          </Card>
-
-          {activityItems.length > 0 && (
-            <ActivityFeed
-              items={activityItems}
-              currentUserId={profile.id}
-              showGroupName
-            />
-          )}
-
-          {(badges?.length ?? 0) > 0 && (
-            <Card className="space-y-3">
-              <CardTitle>Recent Badges</CardTitle>
-              <div className="space-y-2">
-                {badges?.map((b: any) => (
-                  <div
-                    key={b.id}
-                    className="flex items-center gap-3 rounded-xl border border-white/10 bg-card2 p-3"
-                  >
-                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-warning/10 text-warning">
-                      <Award className="h-5 w-5" />
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium text-text">
-                        {b.badge_type === "MONTH_WINNER" ? "Month Winner" : b.badge_type}
-                      </p>
-                      <p className="text-xs text-muted">
-                        {b.gym_groups?.name} •{" "}
-                        {new Date(b.period_start).toLocaleDateString("en-US", {
-                          month: "short",
-                          year: "numeric"
-                        })}
-                      </p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </Card>
-          )}
-        </>
-      )}
-    </div>
+    <DashboardContent
+      profileName={profile.name}
+      profileId={profile.id}
+      groupsWithStats={groupsWithStats as any}
+      totalMonthCheckins={totalMonthCheckins}
+      globalStreak={globalStreak}
+      badges={(badges ?? []) as any}
+      todayCheckedGroups={todayCheckedGroups}
+      activityItems={activityItems}
+    />
   );
 }

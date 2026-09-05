@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslation } from "react-i18next";
 import { Card, CardMeta, CardTitle } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { supabaseBrowser } from "@/lib/supabase/browser";
@@ -34,14 +35,15 @@ export function PendingApprovals({
   const supabase = supabaseBrowser();
   const router = useRouter();
   const { push, pushXPGain } = useToast();
+  const { t } = useTranslation(["groups", "common"]);
 
   const [busyId, setBusyId] = useState<string | null>(null);
 
   if (!items.length) {
     return (
       <Card className="space-y-2">
-        <CardTitle>Manual approvals</CardTitle>
-        <CardMeta>No pending requests.</CardMeta>
+        <CardTitle>{t("groups:manualApprovals")}</CardTitle>
+        <CardMeta>{t("groups:noPending")}</CardMeta>
       </Card>
     );
   }
@@ -49,8 +51,8 @@ export function PendingApprovals({
   return (
     <Card className="space-y-3">
       <div>
-        <CardTitle>Manual approvals</CardTitle>
-        <CardMeta>Any other member can approve. Admins can reject.</CardMeta>
+        <CardTitle>{t("groups:manualApprovals")}</CardTitle>
+        <CardMeta>{t("groups:anyMemberCanApprove")}</CardMeta>
       </div>
       <div className="space-y-2">
         {items.map((x) => (
@@ -63,7 +65,7 @@ export function PendingApprovals({
                 <p className="text-sm font-semibold">
                   {x.users?.name ?? x.user_id}
                 </p>
-                <p className="text-xs text-muted">Date: {x.checkin_date}</p>
+                <p className="text-xs text-muted">{t("groups:dateLabel", { date: x.checkin_date })}</p>
               </div>
               <div className="flex items-center gap-2">
                 <Button
@@ -77,7 +79,6 @@ export function PendingApprovals({
                       });
                       if (error) throw error;
 
-                      // Award XP to the person who got approved (async, don't wait)
                       (async () => {
                         try {
                           const streak = await getStreakForUser(supabase, x.user_id, groupId, timezone);
@@ -94,7 +95,6 @@ export function PendingApprovals({
                         }
                       })();
 
-                      // Award small XP to the approver
                       (async () => {
                         try {
                           await supabase.rpc("award_xp", {
@@ -110,7 +110,7 @@ export function PendingApprovals({
                         }
                       })();
 
-                      push({ type: "success", message: "Approved." });
+                      push({ type: "success", message: t("groups:approved") });
                       router.refresh();
                     } catch (e: any) {
                       push({ type: "error", message: humanizeError(e) });
@@ -119,7 +119,7 @@ export function PendingApprovals({
                     }
                   }}
                 >
-                  Approve
+                  {t("common:approve")}
                 </Button>
                 {isAdmin ? (
                   <Button
@@ -128,14 +128,14 @@ export function PendingApprovals({
                     disabled={busyId === x.id}
                     onClick={async () => {
                       try {
-                        const reason = window.prompt("Reason (optional)?") ?? "";
+                        const reason = window.prompt(t("groups:reasonPrompt")) ?? "";
                         setBusyId(x.id);
                         const { error } = await supabase.rpc("reject_manual_checkin", {
                           p_check_in_id: x.id,
                           p_reason: reason
                         });
                         if (error) throw error;
-                        push({ type: "success", message: "Rejected." });
+                        push({ type: "success", message: t("groups:rejected") });
                         router.refresh();
                       } catch (e: any) {
                         push({ type: "error", message: humanizeError(e) });
@@ -144,7 +144,7 @@ export function PendingApprovals({
                       }
                     }}
                   >
-                    Reject
+                    {t("common:reject")}
                   </Button>
                 ) : null}
               </div>
@@ -155,10 +155,3 @@ export function PendingApprovals({
     </Card>
   );
 }
-
-
-
-
-
-
-

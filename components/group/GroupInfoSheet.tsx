@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "react-i18next";
 import { Sheet } from "@/components/ui/Sheet";
 import { Button } from "@/components/ui/Button";
 import { InviteLinkCard } from "./InviteLinkCard";
@@ -42,24 +43,24 @@ export function GroupInfoSheet({
   isAdmin: boolean;
   userId: string;
 }) {
+  const { t } = useTranslation(["groups", "common"]);
+
   return (
-    <Sheet open={open} onClose={onClose} title="Group Info">
-      {/* Overview */}
+    <Sheet open={open} onClose={onClose} title={t("groups:groupInfo")}>
       {description ? (
         <div className="space-y-1">
-          <h3 className="text-sm font-semibold text-muted">About</h3>
+          <h3 className="text-sm font-semibold text-muted">{t("groups:about")}</h3>
           <p className="text-sm">{description}</p>
-          <p className="text-xs text-muted">Timezone: {timezone}</p>
+          <p className="text-xs text-muted">{t("groups:timezoneLabel", { tz: timezone })}</p>
         </div>
       ) : (
-        <p className="text-xs text-muted">Timezone: {timezone}</p>
+        <p className="text-xs text-muted">{t("groups:timezoneLabel", { tz: timezone })}</p>
       )}
 
-      {/* Members */}
       <div className="space-y-2">
         <div className="flex items-center justify-between">
           <h3 className="text-sm font-semibold text-muted">
-            Members ({members.length})
+            {t("groups:members", { count: members.length })}
           </h3>
         </div>
         <div className="space-y-2">
@@ -75,18 +76,17 @@ export function GroupInfoSheet({
                 <p className="text-xs text-muted">{m.role}</p>
               </div>
               {m.user_id === userId ? (
-                <span className="text-xs text-muted">You</span>
+                <span className="text-xs text-muted">{t("common:you")}</span>
               ) : null}
             </div>
           ))}
         </div>
       </div>
 
-      {/* Locations */}
       <div className="space-y-2">
         <div className="flex items-center justify-between">
           <h3 className="text-sm font-semibold text-muted">
-            Locations ({locations.length})
+            {t("common:locations")} ({locations.length})
           </h3>
           {isAdmin ? (
             <Button
@@ -94,7 +94,7 @@ export function GroupInfoSheet({
               variant="secondary"
               className="text-xs"
             >
-              Manage
+              {t("common:manage")}
             </Button>
           ) : null}
         </div>
@@ -107,24 +107,22 @@ export function GroupInfoSheet({
               >
                 <p className="text-sm font-semibold">{l.name}</p>
                 <p className="text-xs text-muted">
-                  Radius: {l.radius_m}m
+                  {t("groups:radiusLabel", { radius: l.radius_m })}
                 </p>
               </div>
             ))}
           </div>
         ) : (
           <p className="text-xs text-muted">
-            No locations set. Check-ins need at least one location.
+            {t("groups:noLocationsHint")}
           </p>
         )}
       </div>
 
-      {/* Invite Link (Admin only) */}
       {isAdmin ? (
         <InviteLinkCard groupId={groupId} />
       ) : null}
 
-      {/* Leave Group */}
       <div className="pt-2 border-t border-white/10">
         <LeaveGroupButton
           groupId={groupId}

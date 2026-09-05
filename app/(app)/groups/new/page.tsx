@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslation } from "react-i18next";
 import { TopBar } from "@/components/nav/TopBar";
 import { Button } from "@/components/ui/Button";
 import { Card, CardMeta, CardTitle } from "@/components/ui/Card";
@@ -16,6 +17,7 @@ export default function CreateGroupPage() {
   const supabase = supabaseBrowser();
   const router = useRouter();
   const { push } = useToast();
+  const { t } = useTranslation(["groups", "common"]);
 
   const defaultTz = useMemo(() => Intl.DateTimeFormat().resolvedOptions().timeZone ?? "UTC", []);
 
@@ -27,31 +29,31 @@ export default function CreateGroupPage() {
 
   return (
     <div className="space-y-3">
-      <TopBar title="Create Group" right={<Button href="/groups" variant="ghost">Back</Button>} />
+      <TopBar title={t("groups:createGroup")} right={<Button href="/groups" variant="ghost">{t("common:back")}</Button>} />
 
       <Card className="space-y-4">
         <div>
-          <CardTitle>Basics</CardTitle>
-          <CardMeta>You can add locations and a routine after creating.</CardMeta>
+          <CardTitle>{t("groups:basics")}</CardTitle>
+          <CardMeta>{t("groups:basicsHint")}</CardMeta>
         </div>
 
         <div className="space-y-2">
-          <label htmlFor="group-name" className="text-xs text-muted">Name</label>
-          <Input id="group-name" value={name} onChange={(e) => setName(e.target.value)} placeholder="Crew Gym" />
+          <label htmlFor="group-name" className="text-xs text-muted">{t("common:name")}</label>
+          <Input id="group-name" value={name} onChange={(e) => setName(e.target.value)} placeholder={t("groups:groupNamePlaceholder")} />
         </div>
 
         <div className="space-y-2">
-          <label htmlFor="group-description" className="text-xs text-muted">Description (optional)</label>
+          <label htmlFor="group-description" className="text-xs text-muted">{t("groups:descriptionOptional")}</label>
           <Textarea
             id="group-description"
             value={description}
             onChange={(e) => setDescription(e.target.value)}
-            placeholder="We train weekdays, accountability only"
+            placeholder={t("groups:descriptionPlaceholder")}
           />
         </div>
 
         <div className="space-y-2">
-          <label htmlFor="group-timezone" className="text-xs text-muted">Timezone</label>
+          <label htmlFor="group-timezone" className="text-xs text-muted">{t("common:timezone")}</label>
           <select
             id="group-timezone"
             className="h-11 w-full rounded-xl border border-white/10 bg-card2 px-3 text-sm"
@@ -67,7 +69,7 @@ export default function CreateGroupPage() {
         </div>
 
         <div className="space-y-2">
-          <label htmlFor="group-routine" className="text-xs text-muted">Routine (optional)</label>
+          <label htmlFor="group-routine" className="text-xs text-muted">{t("groups:routineOptional")}</label>
           <input
             id="group-routine"
             type="file"
@@ -113,7 +115,7 @@ export default function CreateGroupPage() {
                   }
                 }
               }
-              push({ type: "success", message: "Group created" });
+              push({ type: "success", message: t("groups:groupCreated") });
               router.replace(`/g/${groupId}`);
             } catch (e: any) {
               push({ type: "error", message: humanizeError(e) });
@@ -122,11 +124,9 @@ export default function CreateGroupPage() {
             }
           }}
         >
-          {loading ? "Creating..." : "Create Group"}
+          {loading ? t("auth:creating") : t("groups:createGroup")}
         </Button>
       </Card>
     </div>
   );
 }
-
-
